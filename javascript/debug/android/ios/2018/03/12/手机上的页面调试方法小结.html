@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer" />
+
+  <title>手机上的页面调试方法小结</title>
+  <meta name="description"
+    content="最近在开发一个微信上的网站，前期都是用微信开发者工具进行预览，这阶段上真机上看效果发现有电脑上浏览时没有的bug，不管在android还是ios都有bug。。。。而且表现还不一样。。。花了段时间了解如何在手机上调试，在这里总结下。">
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  
+  <link rel="canonical" href="https://x1aoj1ang.github.io/javascript/debug/android/ios/2018/03/12/%E6%89%8B%E6%9C%BA%E4%B8%8A%E7%9A%84%E9%A1%B5%E9%9D%A2%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E5%B0%8F%E7%BB%93.html">
+  <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">xiaojiang_blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/404.html">Page not found</a>
+          
+        
+          
+          <a class="page-link" href="/about/">about</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">手机上的页面调试方法小结</h1>
+    <p class="post-meta"><time datetime="2018-03-12T05:49:11+08:00" itemprop="datePublished">Mar 12, 2018</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>最近在开发一个微信上的网站，前期都是用微信开发者工具进行预览，这阶段上真机上看效果发现有电脑上浏览时没有的bug，不管在android还是ios都有bug。。。。而且表现还不一样。。。花了段时间了解如何在手机上调试，在这里总结下。</p>
+
+<h2 id="手机上的前端代码的运行环境">手机上的前端代码的运行环境</h2>
+
+<p>在ios上，由于系统的限制，不管是是在自带浏览器safari中访问，或者是其它app中的webview的方式访问，前端代码的运行环境都是safari。因为所有ios上的app中的webview页面（不管是ios上的chrome，还是微信）底下用的也是跟safari一样的内核。
+而在android上，各个浏览器或者是各个app中的webview都可以用自己的内核，微信在webview中用的是chrome内核的修改版X5（好像又称TBS？）。</p>
+
+<h2 id="手机上的前端调试方法">手机上的前端调试方法</h2>
+
+<p>就目前我看到的来说，一共有两类方法：</p>
+
+<ol>
+  <li>在浏览器或者app支持的情况下，打开调试设置并连接电脑进行远程调试</li>
+  <li>用网络代理抓包调试，用抓包工具结合weinre嵌入调试代码以达到调试的目的</li>
+</ol>
+
+<p>第一种办法功能最为强大全面，但适用条件较为苛刻，需要应用（浏览器、app）本身有支持（也就是说要可以打开调试接口给pc用）。
+第二种较为通用，只要在同一个局域网下，手机设置网络代理为pc就行，就可以达到抓包的目的，而其中的调试功能是依靠weinre嵌入到前端的代码实现的（所以不能算是真正的调试。。。而且嵌入的代码感觉也可能影响原有前端代码的运行。）。
+所以条件允许的情况下，尽量使用第一种方法。仅在一种情况下第二种方法能得到比第一种方法更多的调试信息：<strong>页面发生跳转</strong>。第一种调试，针对的某一个具体的网页的调试，而在发生跳转的情况下（例如微信登陆），并不能捕捉跳转后页面的信息。第二种，抓包，针对的是通过代理的所有请求，因此即使发生页面跳转也可以。</p>
+
+<h2 id="android上的页面调试">android上的页面调试</h2>
+
+<p>浏览器太多，这里只考虑chrome和微信里的webview。
+在开发者选项中，打开android上的usb调试选项，连接电脑后信任电脑即可。具体参考这篇文章:<a href="https://developers.google.com/web/tools/chrome-devtools/remote-debugging/">远程调试 Android 设备使用入门</a>.顺利的话，在手机端的chrom随意打开一个页面，在pc上的chrome的远程调试中可以看到如下的：
+<img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQOrJLzkI3ONMCGOPbAoicfeARicMPKoB09u8Vvucjk2ASceBgUKicOuWQST513hiaNaicZo33FtXjMxNqw/0?wx_fmt=png" alt="Chrome Remote Debugging" referrerpolicy="no-referrer" />
+要调试微信里面的页面，还需要打开调试开关。在微信中访问<a href="http://debugx5.qq.com/">微信页面调试设置页面debugx5.qq.com</a>,在信息中的TBS setting,打开需要的调试功能即可。清理页面缓存以及cookies的功能也是在此页面中。</p>
+
+<h2 id="ios上的页面调试">ios上的页面调试</h2>
+
+<p>情况较为单一，反正都是safari，但也是分为两种情况，一是safari直接浏览，二是app（比如微信）中的webview。</p>
+
+<p>如果要像上述那样在pc上利用chrome远程调试的话，需要先在pc上安装itunes（一定要安装itunes！似乎是起到了连接ios设备调试功能的驱动作用），在ios里的safari设置需要打开web检查器，接着使用此软件：<a href="https://github.com/google/ios-webkit-debug-proxy">ios-webkit-debug-proxy</a>。按照ios-webkit-debug-proxy的使用说明一步步进行，就可以在chrome上调试ios设备上直接用safari浏览器打开的页面。</p>
+
+<p>那对于app中的webview呢？如果是自己开发的app并且处于开发环境下的话，似乎可以在mac中也可以利用上述的ios-webkit-debug-proxy在chrome中进行调试。。。但微信的话，就没办法这么调试了，只能使用第二种方法-网络代理调试。这类软件挺多的（之前用的mitmproxy，也不错，抓包看移动设备的http/https请求和返回），有一款比较好用的是<a href="https://github.com/wuchangming/spy-debugger">spy-debugger</a>.原理都一样，在pc上启动一个代理服务，把移动设备的上网设置为从此代理上走并信任代理服务的ca证书（用于https流量），然后就可以在pc上的代理服务看抓包的内容了，集成了weinre的spy-debugger还自动插入了调试需要的代码。</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">xiaojiang_blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>xiaojiang_blog</li>
+          <li><a href="mailto:wsxjump@gmail.com">wsxjump@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/x1aoj1ang"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">x1aoj1ang</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>小江的博客。。。也没什么要介绍的好像。。。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-155064561-1');
+</script>
+
+
+  </body>
+
+</html>

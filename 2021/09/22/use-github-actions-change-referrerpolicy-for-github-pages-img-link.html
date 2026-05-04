@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer" />
+
+  <title>配置脚本跑actions用referrerpolicy图片属性反防盗链</title>
+  <meta name="description"
+    content="需要反防盗链的原因">
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  
+  <link rel="canonical" href="https://x1aoj1ang.github.io/2021/09/22/use-github-actions-change-referrerpolicy-for-github-pages-img-link.html">
+  <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">xiaojiang_blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/404.html">Page not found</a>
+          
+        
+          
+          <a class="page-link" href="/about/">about</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">配置脚本跑actions用referrerpolicy图片属性反防盗链</h1>
+    <p class="post-meta"><time datetime="2021-09-22T16:15:50+08:00" itemprop="datePublished">Sep 22, 2021</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h2 id="需要反防盗链的原因">需要反防盗链的原因</h2>
+
+<p>文章同时在微信平台和Github Pages个人博客中发布,不想传两次图片的话,可以把微信平台当图床.</p>
+
+<p>但是微信平台的图片有反盗链,不是在浏览微信文章的时候打开图片的话,无法显示.</p>
+
+<h2 id="防盗链的判断">防盗链的判断</h2>
+
+<p>判断请求图片时浏览器发送的referrer.</p>
+
+<p>referrer是浏览器请求时自动带上的一个域名,表示是从哪个页面发起的请求.</p>
+
+<p>如果referrer中带的链接是平台文章链接,则可以打开图片.</p>
+
+<p>如果referrer链接是其它域名,则表示是其它网站引用的图片,会判断为盗链从而无法打开.</p>
+
+<p>不过这次测试发现如果用盗链方式打开某一个链接打不开后,仅修改referrer的话,在一段时间内还是打不开,因此也可能有其它判断依据,但目前主要还是看referrer.</p>
+
+<h2 id="反防盗链的原理">反防盗链的原理</h2>
+
+<p>有个浏览需求和防盗链有矛盾:在浏览器地址栏直接打开图片链接,需要能访问图片,而此时请求头不带referrer.</p>
+
+<p>也就是说只要请求图片时候不带上referrer属性,后端会把请求识别为用户直接打开的图片链接(而不是处在某个页面中的请求),因此将其放行.</p>
+
+<p>所以只要防盗链系统允许从地址栏敲链接直接浏览资源,而我们又能把页面中的图片请求时候带的referrer属性去除的话,就无法靠referrer属性防盗链.</p>
+
+<h2 id="以往的2017年之前反防盗链">以往的(2017年之前)反防盗链</h2>
+
+<p>旧的反防盗链方式,用js将图片嵌入iframe以达到不发referer的效果,之前本站使用的就是这个:<a href="https://github.com/jpgerek/referrer-killer">https://github.com/jpgerek/referrer-killer</a></p>
+
+<p>可能出现的问题:</p>
+
+<ul>
+  <li>如果img不是一开始就包在iframe中的话,浏览器在没执行js前就加载,依然是带referer请求(可能是预加载的机制)</li>
+  <li>iframe中的格式得另外设置</li>
+  <li>复制到微信H5编辑器时,带的iframe识别不出来</li>
+</ul>
+
+<p>可能还有其它办法(比如https页面带http请求不发referer,未验证此法)反防盗链,但应该还是iframe更合适通用.</p>
+
+<h2 id="用html新属性最早2017年反防盗链">用HTML新属性(最早2017年)反防盗链</h2>
+
+<p>Chrome 51开始为img引入了referrerpolicy属性.</p>
+
+<p>具体可参考<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-referrerpolicy">https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-referrerpolicy</a></p>
+
+<p>因此设置<code class="language-plaintext highlighter-rouge">referrerpolicy</code>为<code class="language-plaintext highlighter-rouge">no-referrer</code>或<code class="language-plaintext highlighter-rouge">same-origin</code>在反防盗链场景中不发送referrer.</p>
+
+<p>此属性的支持情况参考:<a href="https://caniuse.com/mdn-html_elements_img_referrerpolicy">https://caniuse.com/mdn-html_elements_img_referrerpolicy</a></p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQP26F01ibXeUDJStbpb9ibmO7CYZH7dd1T8ZZ4INXOAueCNHZNvACIwGJ98r75eapc6InHHG6xSAzWA/0?wx_fmt=png" alt="img_referrerpolicy_support" referrerpolicy="no-referrer" /></p>
+
+<p>目前大部分浏览器均已支持此属性.ios safari根据这个表应该是不支持的,但实际测试了下却能使用,可能实际是支持的,也可能是因为ios safari的其它隐私保护机制导致的吧,未验证.</p>
+
+<p>所以,为了反防盗链,要为<code class="language-plaintext highlighter-rouge">img</code>加上属性<code class="language-plaintext highlighter-rouge">referrerpolicy</code>并设置为<code class="language-plaintext highlighter-rouge">no-referrer</code>.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQP26F01ibXeUDJStbpb9ibmO7CYZH7dd1T8ZZ4INXOAueCNHZNvACIwGJ98r75eapc6InHHG6xSAzWA/0?wx_fmt=png"</span> <span class="na">alt=</span><span class="s">"img_referrerpolicy_support"</span> <span class="na">referrerpolicy=</span><span class="s">"no-referrer"</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<h2 id="怎么在生成的html中加上referrerpolicyno-referrer">怎么在生成的html中加上<code class="language-plaintext highlighter-rouge">referrerpolicy="no-referrer"</code></h2>
+
+<h3 id="尝试过程">尝试过程</h3>
+
+<p>思考了几种加上这个属性的方案:</p>
+
+<ul>
+  <li>用js的逻辑来加</li>
+  <li>markdown里面加</li>
+  <li>实现jekyll的插件加</li>
+  <li>实现Liquid的filter或者tag加</li>
+</ul>
+
+<p>但是查阅了下,Github Pages对所使用的插件有白名单限制<a href="https://pages.github.com/versions/">https://pages.github.com/versions/</a>,因此后两种方案基本没法实现了<del>,实际上我看了也不知道怎么实现</del>.</p>
+
+<p>接着考虑使用js来加,将之前的img放iframe,改成img都加上<code class="language-plaintext highlighter-rouge">referrerpolicy="no-referrer"</code>:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nb">window</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">imgs</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="dl">'</span><span class="s1">img</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">[].</span><span class="nx">forEach</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">imgs</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">array</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">element</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="dl">"</span><span class="s2">referrerpolicy</span><span class="dl">"</span><span class="p">,</span><span class="dl">"</span><span class="s2">no-referrer</span><span class="dl">"</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>不行,在网络请求中还是先看到了img请求带referer.</p>
+
+<p>也许是时机不对?加上onload再试.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">function</span> <span class="nx">killimgref</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">imgs</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="dl">'</span><span class="s1">img</span><span class="dl">'</span><span class="p">);</span>
+      <span class="p">[].</span><span class="nx">forEach</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">imgs</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">array</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">element</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="dl">"</span><span class="s2">referrerpolicy</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">no-referrer</span><span class="dl">"</span><span class="p">);</span>
+      <span class="p">});</span>
+    <span class="p">}</span>
+    <span class="nb">window</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="nx">killimgref</span><span class="p">;</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="nx">killimgref</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>也还是不行,也许再找找其它事件能比请求img的时机更早.</p>
+
+<p>但想到浏览器可能会有某种机制(预加载机制?)在接收到img的src时就去请求,那js再怎么改也就没用了.</p>
+
+<p>要实现的效果更好更稳定的话,还是得从markdown生成的html入手.</p>
+
+<p>搜了下,找到类似的:<a href="https://stackoverflow.com/questions/41455133/how-do-you-programmatically-apply-a-css-class-to-paragraphs-in-jekyll">https://stackoverflow.com/questions/41455133/how-do-you-programmatically-apply-a-css-class-to-paragraphs-in-jekyll</a></p>
+
+<p>jekyll使用kramdown从md生成html,因此参考kramdown也确实是这样的,缺点是inline-attributes不是标准的markdown的语法.</p>
+
+<h3 id="用kramdown的语法设置referrerpolicy">用kramdown的语法设置referrerpolicy</h3>
+
+<p><a href="https://kramdown.gettalong.org/quickref.html#inline-attributes">https://kramdown.gettalong.org/quickref.html#inline-attributes</a></p>
+
+<p>很简单只要在图片后面加上<code class="language-plaintext highlighter-rouge">{: referrerpolicy="no-referrer"}</code>就行.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">![</span><span class="nv">img_referrerpolicy_support</span><span class="p">](</span><span class="sx">https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQP26F01ibXeUDJStbpb9ibmO7CYZH7dd1T8ZZ4INXOAueCNHZNvACIwGJ98r75eapc6InHHG6xSAzWA/0?wx_fmt=png</span><span class="p">)</span>{: referrerpolicy="no-referrer"}
+</code></pre></div></div>
+
+<h2 id="如何自动设置referrerpolicy">如何自动设置referrerpolicy</h2>
+
+<p>在加图片的时候手工加上<code class="language-plaintext highlighter-rouge">{: referrerpolicy="no-referrer"}</code>也不是不行,但文章可能很久才会写一次,因此这种语法下次肯定忘了.最好是写小作文时候,我只需要参考标准的markdown语法,由程序来生成额外的属性.</p>
+
+<h3 id="思考可能的方案">思考可能的方案</h3>
+
+<p>既然是自动的,那就要写个脚本来加.</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">add-noreferer-attr.py</code></strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'./_posts'</span>
+
+<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">.</span><span class="n">glob</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s">"**/*.md"</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">)]</span>
+
+<span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+    <span class="n">replacement</span> <span class="o">=</span> <span class="s">""</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="s">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">mdfilein</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">mdfilein</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">'!['</span><span class="p">)</span> <span class="ow">and</span> <span class="n">line</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="sa">r</span><span class="s">'{: referrerpolicy="no-referrer"}'</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">line</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="sa">r</span><span class="s">'http'</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="p">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">'</span><span class="se">\r\n</span><span class="s">'</span><span class="p">):</span>
+                    <span class="n">ending</span> <span class="o">=</span> <span class="s">'</span><span class="se">\r\n</span><span class="s">'</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ending</span> <span class="o">=</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span>
+                <span class="n">replacement</span> <span class="o">=</span> <span class="n">replacement</span> <span class="o">+</span> <span class="n">line</span><span class="p">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="sa">r</span><span class="s">'{: referrerpolicy="no-referrer"}'</span> <span class="o">+</span> <span class="n">ending</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">replacement</span> <span class="o">=</span> <span class="n">replacement</span> <span class="o">+</span> <span class="n">line</span>
+        <span class="c1"># print(mdfile.readline())       
+</span>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="s">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">mdfileout</span><span class="p">:</span>
+        <span class="n">mdfileout</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<p>然后考虑在何处何时可以自动运行此脚本,比较容易想到有两种:</p>
+
+<ul>
+  <li>git hook</li>
+  <li>CI,如Github Actions</li>
+</ul>
+
+<p>各有优缺点,git hook比较通用,ci的话则是根据CI平台的不同配置的语法不同.</p>
+
+<p>但是git hook似乎是本地跑的脚本才行,而如果是github.dev上直接编辑的是否可以呢?</p>
+
+<p>应该不行(未验证),因为如果连github.dev的编辑也可以跑git hook的脚本的话,等于可以用上github的算力做事情了,而这应该是不允许的.</p>
+
+<p>所以为了以后直接在github.dev在线写文章脚本也可以直接运行,应该还是用CI比较合适,看了下免费的配额(每月2000分钟)也足够使用了,并且这边本来就是使用的Github Pages也是绑定在这个平台上了,也就无所谓多使用一个Github Actions了.实际上,Github Pages的生成发布过程,也是CI/CD.</p>
+
+<p>细看了下Github Actions的文档,可以指定CI过程所挂钩的branch,而Github Pages也可以指定所发布的branch.</p>
+
+<p>这样就可以区分编辑和发布所使用的branch,使用不同分支也避免了Github Pages发布流程多次运行:人类提交一次,CI触发脚本修改了又提交一次,因此只用一个分支的话就会导致Pages运行两次发布.</p>
+
+<p>区分master和publish后整个发布过程比较清晰:</p>
+
+<ol>
+  <li>作者在master分支写文章提交</li>
+  <li>master提交触发Github Actions</li>
+  <li>Github Actions运行脚本将批量添加后的md文件提交到publish分支</li>
+  <li>publish分支的提交触发Github Pages的发布</li>
+</ol>
+
+<h3 id="配置github-actions跑add-noreferer-attrpy">配置Github Actions跑<code class="language-plaintext highlighter-rouge">add-noreferer-attr.py</code></h3>
+
+<p>这里的逻辑比较简单,根据 <a href="https://docs.github.com/en/actions/quickstart">https://docs.github.com/en/actions/quickstart</a> 改动下入门脚本就行:</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">GitHub Actions Demo</span>
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">master</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">Explore-GitHub-Actions</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">echo "🎉 The job was automatically triggered by a $ event."</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">echo "🐧 This job is now running on a $ server hosted by GitHub!"</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">echo "🔎 The name of your branch is $ and your repository is $."</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Check out repository code</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*</span>
+          <span class="s">git config user.email "GitHubActions@github.com"</span>
+          <span class="s">git config user.name "GitHub Actions"</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">echo "💡 The $ repository has been cloned to the runner."</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">echo "🖥️ The workflow is now ready to test your code on the runner."</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">run  add-noreferer-attr.py</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">cd $</span>
+          <span class="s">chmod +x  add-noreferer-attr.py</span>
+          <span class="s">./add-noreferer-attr.py</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">git add -A</span>
+          <span class="s">if [ -z "$(git status --porcelain)" ]; then</span>
+            <span class="s">echo "No changes to commit"</span>
+          <span class="s">else</span>
+            <span class="s">git commit -m "auto add noreferer to publish in actions"</span>
+          <span class="s">fi</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">git push --force origin master:publish</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">echo "🍏 This job's status is $."</span>
+</code></pre></div></div>
+
+<h2 id="更简单的实现">更简单的实现</h2>
+
+<p>在写这篇文章的时候看到MDN的文档才发现可以直接在全局的模板html文件中加上 <code class="language-plaintext highlighter-rouge">&lt;meta name="referrer" content="no-referrer" /&gt;</code> ,并且是这个项目中原本就有配置…但为啥没生效呢..?????</p>
+
+<p>仔细看了下…才知道引号用错了…翻了下commit记录,发现在2019年的时候尝试使用no-referer来反盗链没成功才用的referer-killer的…但其实不是no-referer不行而是我加了引号不行…</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQP26F01ibXeUDJStbpb9ibmO72u1icTWSxaUE0fHJz7ZqmvETejehlCXJSyPQYjBVSPC1n1icX4Hobd8g/0?wx_fmt=png" alt="quote error" referrerpolicy="no-referrer" /></p>
+
+<p>看了下那天的谷歌搜索记录,发现今天又一次知道的东西之前就搜过了…然而现在才知道前年用no-referer不行的原因居然是因为引号太低级了,linter真的是很重要…</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQP26F01ibXeUDJStbpb9ibmO7u4P1ptKrVBPsXBxHUXbdbu6wibbPO3HU7LBvpLbtjbweqpLZHl1liaUg/0?wx_fmt=png" alt="search history" referrerpolicy="no-referrer" /></p>
+
+<p>那天还带着错误的引号查为啥no-referer没生效…</p>
+
+<h2 id="总结">总结</h2>
+
+<p>写了很多才知道同一个坑被我踩了两次才过去,但这次毕竟是第一次使用Github Actions,而以后说不定有其它更适合的场景可以使用,比如用linter规范项目避免符号错误的情况再次出现,还是有参考价值的.</p>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Referer">https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Referer</a></p>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-referrerpolicy">https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-referrerpolicy</a></p>
+
+<p>旧的反防盗链方式,将图片嵌入iframe以达到不发referer的效果:<a href="https://github.com/jpgerek/referrer-killer">https://github.com/jpgerek/referrer-killer</a></p>
+
+<p>iframe反防盗链参考:<a href="https://happy123.me/blog/2017/10/31/http-referer-de-dao-lian-yu-fan-dao-lian/ ">https://happy123.me/blog/2017/10/31/http-referer-de-dao-lian-yu-fan-dao-lian/ </a></p>
+
+<p><a href="https://stackoverflow.com/questions/41455133/how-do-you-programmatically-apply-a-css-class-to-paragraphs-in-jekyll">https://stackoverflow.com/questions/41455133/how-do-you-programmatically-apply-a-css-class-to-paragraphs-in-jekyll</a></p>
+
+<p><a href="https://kramdown.gettalong.org/quickref.html#inline-attributes">https://kramdown.gettalong.org/quickref.html#inline-attributes</a></p>
+
+<p><a href="https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#onpushpull_requestbranchestags">https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#onpushpull_requestbranchestags</a></p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">xiaojiang_blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>xiaojiang_blog</li>
+          <li><a href="mailto:wsxjump@gmail.com">wsxjump@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/x1aoj1ang"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">x1aoj1ang</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>小江的博客。。。也没什么要介绍的好像。。。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-155064561-1');
+</script>
+
+
+  </body>
+
+</html>

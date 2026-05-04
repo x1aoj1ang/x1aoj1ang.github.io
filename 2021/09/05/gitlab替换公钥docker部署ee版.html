@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer" />
+
+  <title>gitlab替换公钥docker部署ee版</title>
+  <meta name="description"
+    content="为啥使用gitlab ee">
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  
+  <link rel="canonical" href="https://x1aoj1ang.github.io/2021/09/05/gitlab%E6%9B%BF%E6%8D%A2%E5%85%AC%E9%92%A5docker%E9%83%A8%E7%BD%B2ee%E7%89%88.html">
+  <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">xiaojiang_blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/404.html">Page not found</a>
+          
+        
+          
+          <a class="page-link" href="/about/">about</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">gitlab替换公钥docker部署ee版</h1>
+    <p class="post-meta"><time datetime="2021-09-05T00:15:50+08:00" itemprop="datePublished">Sep 5, 2021</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h2 id="为啥使用gitlab-ee">为啥使用gitlab ee</h2>
+
+<p>对开发最大的好处就是ee版可以结合elasticsearch进行代码搜索。</p>
+
+<p>在上一家，一开始部署的gitlab也是ce版本，后来发现基本没法全局搜索代码，就换成了ee试用。</p>
+
+<p>当时怎么部署的基本忘了，这几天重新部署了下，写个文档记录。</p>
+
+<h2 id="gitalb-ee许可证相关操作">gitalb ee许可证相关操作</h2>
+
+<p>gitlab ee的许可证密钥文件是提供给用户可以自行替换的，然后就能颁发许可证，并且也给了使用说明文档：<a href="https://www.rubydoc.info/gems/gitlab-license/">https://www.rubydoc.info/gems/gitlab-license/</a></p>
+
+<p>而许可证的生成可以查看usage用例里面直接写着的怎么生成需要的license文件了，就差没设置plan属性。。。。结合license定义文件就知道有哪些可以设置的了：<a href="https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/license.rb">https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/license.rb</a></p>
+
+<p>并且不用自行搭建ruby环境，直接在gitlab容器内，<code class="language-plaintext highlighter-rouge">sudo gitlab-rails console</code>进入ruby环境，同时省去各种依赖的下载安装和引入。</p>
+
+<p>参考<a href="https://www.rubydoc.info/gems/gitlab-license/">https://www.rubydoc.info/gems/gitlab-license/</a>中的Usage,在设置license.restrictions时把plan也写上。</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">irb</span><span class="p">(</span><span class="n">main</span><span class="p">):</span><span class="mo">043</span><span class="p">:</span><span class="mi">1</span><span class="o">*</span> <span class="n">license</span><span class="p">.</span><span class="nf">restrictions</span>  <span class="o">=</span> <span class="p">{</span>
+<span class="n">irb</span><span class="p">(</span><span class="n">main</span><span class="p">):</span><span class="mo">044</span><span class="p">:</span><span class="mi">1</span><span class="o">*</span>   <span class="ss">active_user_count: </span><span class="mi">10000</span><span class="p">,</span>
+<span class="n">irb</span><span class="p">(</span><span class="n">main</span><span class="p">):</span><span class="mo">045</span><span class="p">:</span><span class="mi">1</span><span class="o">*</span>   <span class="ss">plan: </span><span class="s1">'ultimate'</span>
+<span class="n">irb</span><span class="p">(</span><span class="n">main</span><span class="p">):</span><span class="mo">046</span><span class="p">:</span><span class="mi">0</span><span class="o">&gt;</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>结合docker的挂载替换文件功能，就可以把许可证密钥替换成自己签发的，然后再上传生成的许可证文件即可。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      - '{{GITLAB_HOME}}/license/license_key.pub:/opt/gitlab/embedded/service/gitlab-rails/.license_encryption_key.pub'
+</code></pre></div></div>
+
+<p>这应该不算破解。。。毕竟人家连许可证公钥的生成都直接提供文档了。。。</p>
+
+<h3 id="20231005更新">20231005更新</h3>
+
+<p>这个过程可以做成ruby脚本然后用rails runner运行。</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'openssl'</span>
+
+<span class="c1"># Generate a key pair. You should do this only once.</span>
+<span class="n">key_pair</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">::</span><span class="no">RSA</span><span class="p">.</span><span class="nf">generate</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>
+
+<span class="c1"># Define path to save the files</span>
+<span class="c1"># path = ENV['HOME']</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">"/tmp"</span>
+
+
+<span class="c1"># Write it to a file to use in the license generation application.</span>
+<span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">/license_key"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="n">f</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">key_pair</span><span class="p">.</span><span class="nf">to_pem</span><span class="p">)</span> <span class="p">}</span>
+
+<span class="c1"># Extract the public key.</span>
+<span class="n">public_key</span> <span class="o">=</span> <span class="n">key_pair</span><span class="p">.</span><span class="nf">public_key</span>
+<span class="c1"># Write it to a file to ship along with the main application.</span>
+<span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">/license_key.pub"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="n">f</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">public_key</span><span class="p">.</span><span class="nf">to_pem</span><span class="p">)</span> <span class="p">}</span>
+
+<span class="c1"># In the license generation application, load the private key from a file.</span>
+<span class="n">private_key</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">::</span><span class="no">RSA</span><span class="p">.</span><span class="nf">new</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">/license_key"</span><span class="p">)</span>
+<span class="no">Gitlab</span><span class="o">::</span><span class="no">License</span><span class="p">.</span><span class="nf">encryption_key</span> <span class="o">=</span> <span class="n">private_key</span>
+
+<span class="c1"># Build a new license.</span>
+<span class="n">license</span> <span class="o">=</span> <span class="no">Gitlab</span><span class="o">::</span><span class="no">License</span><span class="p">.</span><span class="nf">new</span>
+
+<span class="c1"># License information to be rendered as a table in the admin panel.</span>
+<span class="c1"># E.g.: "This instance of GitLab Enterprise Edition is licensed to:"</span>
+<span class="c1"># Specific keys don't matter, but there needs to be at least one.</span>
+<span class="n">license</span><span class="p">.</span><span class="nf">licensee</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s2">"Name"</span>    <span class="o">=&gt;</span> <span class="s2">"Douwe Maan"</span><span class="p">,</span>
+  <span class="s2">"Company"</span> <span class="o">=&gt;</span> <span class="s2">"GitLab B.V."</span><span class="p">,</span>
+  <span class="s2">"Email"</span>   <span class="o">=&gt;</span> <span class="s2">"douwe@gitlab.com"</span>
+<span class="p">}</span>
+
+<span class="c1"># The date the license starts.</span>
+<span class="c1"># Required.</span>
+<span class="n">license</span><span class="p">.</span><span class="nf">starts_at</span> <span class="o">=</span> <span class="no">Date</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+
+<span class="c1"># The date the license expires. Setting it to 2099 as per request.</span>
+<span class="n">license</span><span class="p">.</span><span class="nf">expires_at</span> <span class="o">=</span> <span class="no">Date</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="mi">2099</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+
+<span class="c1"># The below dates are hardcoded in the license so that you can play with the</span>
+<span class="c1"># period after which there are "repercussions" to license expiration.</span>
+
+<span class="c1"># The date admins will be notified about the license's pending expiration.</span>
+<span class="c1"># Not required.</span>
+<span class="n">license</span><span class="p">.</span><span class="nf">notify_admins_at</span> <span class="o">=</span> <span class="no">Date</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="mi">2099</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+
+<span class="c1"># The date regular users will be notified about the license's pending expiration.</span>
+<span class="c1"># Not required.</span>
+<span class="n">license</span><span class="p">.</span><span class="nf">notify_users_at</span> <span class="o">=</span> <span class="no">Date</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="mi">2099</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+
+<span class="c1"># The date "changes" like code pushes, issue or merge request creation</span>
+<span class="c1"># or modification and project creation will be blocked.</span>
+<span class="c1"># Not required.</span>
+<span class="n">license</span><span class="p">.</span><span class="nf">block_changes_at</span> <span class="o">=</span> <span class="no">Date</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="mi">2100</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+
+<span class="c1"># Restrictions bundled with this license.</span>
+<span class="c1"># Not required, to allow unlimited-user licenses for things like educational organizations.</span>
+<span class="n">license</span><span class="p">.</span><span class="nf">restrictions</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="c1"># The maximum allowed number of active users.</span>
+  <span class="c1"># Not required.</span>
+  <span class="ss">plan: </span><span class="s1">'ultimate'</span><span class="p">,</span>
+  <span class="ss">active_user_count: </span><span class="mi">10000</span>
+<span class="p">}</span>
+
+<span class="nb">puts</span> <span class="s2">"License:"</span>
+<span class="nb">puts</span> <span class="n">license</span>
+
+<span class="c1"># Export the license, which encrypts and encodes it.</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">license</span><span class="p">.</span><span class="nf">export</span>
+
+<span class="nb">puts</span> <span class="s2">"Exported license:"</span>
+<span class="nb">puts</span> <span class="n">data</span>
+
+<span class="c1"># Write the license to a file to send to a customer.</span>
+<span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">/GitLabBV.gitlab-license"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="n">f</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">}</span>
+
+<span class="c1"># In the customer's application, load the public key from a file.</span>
+<span class="n">public_key</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">::</span><span class="no">RSA</span><span class="p">.</span><span class="nf">new</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">/license_key.pub"</span><span class="p">)</span>
+<span class="no">Gitlab</span><span class="o">::</span><span class="no">License</span><span class="p">.</span><span class="nf">encryption_key</span> <span class="o">=</span> <span class="n">public_key</span>
+
+<span class="c1"># Read the license from a file.</span>
+<span class="n">data</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">/GitLabBV.gitlab-license"</span><span class="p">)</span>
+
+<span class="c1"># Import the license, which decodes and decrypts it.</span>
+<span class="vg">$license</span> <span class="o">=</span> <span class="no">Gitlab</span><span class="o">::</span><span class="no">License</span><span class="p">.</span><span class="nf">import</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="nb">puts</span> <span class="s2">"Imported license:"</span>
+<span class="nb">puts</span> <span class="vg">$license</span>
+
+</code></pre></div></div>
+
+<p>可以保存至/etc/gitlab/license_script.rb</p>
+
+<p>并使用<code class="language-plaintext highlighter-rouge">sudo   gitlab-rails runner   /etc/gitlab/license_script.rb</code>运行，注意/etc/gitlab/license_script.rb可以归属于git用户。</p>
+
+<p>之后就在/tmp中生成了公钥文件和许可证文件。</p>
+
+<p><code class="language-plaintext highlighter-rouge">sudo cp /tmp/license_key.pub /opt/gitlab/embedded/service/gitlab-rails/.license_encryption_key.pub</code></p>
+
+<p>重新启动服务即可上传许可证来使其生效。</p>
+
+<p>注意如果是linux package包安装方式的话每次升级后都要这么操作下（因为安装更新的过程中公钥会被替换回来），而如果是docker方式的话就不用。</p>
+
+<h2 id="部署gitlab">部署gitlab</h2>
+
+<p>用ansible结合gitlab部署，最为重要的是这个模板文件：</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2.2'</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">web</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s1">'</span><span class="s">gitlab/gitlab-ee:14.0.10-ee.0'</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">always</span>
+    <span class="na">hostname</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{SERVICE_FQDN}}'</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="na">GITLAB_OMNIBUS_CONFIG</span><span class="pi">:</span> <span class="pi">|</span>
+        <span class="s">external_url 'https://{{SERVICE_FQDN}}'</span>
+        <span class="s"># Add any other gitlab.rb configuration here, each on its own line</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">{{SERVICE_ADDR}}:80:80'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">{{SERVICE_ADDR}}:443:443'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">{{SERVICE_ADDR}}:22:22'</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">{{GITLAB_HOME}}/config:/etc/gitlab'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">{{GITLAB_HOME}}/logs:/var/log/gitlab'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">{{GITLAB_HOME}}/data:/var/opt/gitlab'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">{{GITLAB_HOME}}/license/license_key.pub:/opt/gitlab/embedded/service/gitlab-rails/.license_encryption_key.pub'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">/etc/letsencrypt/live/{{SERVICE_FQDN}}/fullchain.pem:/etc/gitlab/ssl/{{SERVICE_FQDN}}.crt'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">/etc/letsencrypt/live/{{SERVICE_FQDN}}/privkey.pem:/etc/gitlab/ssl/{{SERVICE_FQDN}}.key'</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">gitlabinner</span>
+  <span class="na">es</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">docker.elastic.co/elasticsearch/elasticsearch:7.14.1</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">es</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">bootstrap.memory_lock=true</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">ES_JAVA_OPTS=-Xms512m</span><span class="nv"> </span><span class="s">-Xmx512m"</span>
+      <span class="pi">-</span> <span class="s">discovery.type=single-node</span>
+    <span class="na">ulimits</span><span class="pi">:</span>
+      <span class="na">memlock</span><span class="pi">:</span>
+        <span class="na">soft</span><span class="pi">:</span> <span class="s">-1</span>
+        <span class="na">hard</span><span class="pi">:</span> <span class="s">-1</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">/srv/elasticsearch/data:/usr/share/elasticsearch/data</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">gitlabinner</span>
+
+<span class="na">networks</span><span class="pi">:</span>
+  <span class="na">gitlabinner</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">bridge</span>
+</code></pre></div></div>
+
+<p>第一次docker-compose up后进入gitlab ruby环境生成license_key.pub文件和设置过plan的许可证文件，再第二次docker-compose up。</p>
+
+<h2 id="其它">其它</h2>
+
+<p>每三个月手动跑以下命令更新证书。
+<code class="language-plaintext highlighter-rouge">sudo certbot certonly --manual --agree-tos -m XXX@XXXX.cn --no-eff-email --manual-public-ip-logging-ok  --preferred-challenges=dns -d XXXXX.com.cn</code></p>
+
+<p>参考上述[manually-configuring-https]<a href="https://docs.gitlab.com/omnibus/settings/nginx.html#manually-configuring-https">https://docs.gitlab.com/omnibus/settings/nginx.html#manually-configuring-https</a>时候设置 letsencrypt[‘enable’] false后会出错，不设置此项。</p>
+
+<p>在gitlab管理界面中配置<code class="language-plaintext highlighter-rouge">http://es:9200</code>,并且开启index。</p>
+
+<p>中文搜索功能，还得按[说明]<a href="https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html">https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html</a>配置下es</p>
+
+<p>可以设置双ip，让gitlab通过第二个ip来暴露22端口（主机的ssh指定了第一个IP），即模板文件中的SERVICE_ADDR。</p>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://www.rubydoc.info/gems/gitlab-license/">https://www.rubydoc.info/gems/gitlab-license/</a>，usage用例里面直接写着怎么生成需要的license文件了，就差没设置plan属性。。。。结合license定义文件就知道有哪些可以设置的了：<a href="https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/license.rb">https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/license.rb</a></p>
+
+<p>不用gem install，然后这个’gitlab-license’是gitalb官方的，它也引用了这个，上面的文章其实都不用自己搭建ruby环境，只要在已有的gitlab带的环境中干这事就行了，然后也不用修改rb文件，只要在用gitlab-license生成license时候指定plan参数就行。最后其实关键的一点就是替换带原有的pub文件就行，才会认，所以这个不算破解，因为它都把这些列出来让人用了。。。。</p>
+
+<p><a href="https://docs.gitlab.com/ee/install/docker.html">https://docs.gitlab.com/ee/install/docker.html</a></p>
+
+<p>让docker用其它ip的22端口，<a href="https://stackoverflow.com/questions/25036895/how-to-expose-docker-containers-ip-and-port-to-outside-docker-host-without-port">https://stackoverflow.com/questions/25036895/how-to-expose-docker-containers-ip-and-port-to-outside-docker-host-without-port</a></p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">xiaojiang_blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>xiaojiang_blog</li>
+          <li><a href="mailto:wsxjump@gmail.com">wsxjump@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/x1aoj1ang"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">x1aoj1ang</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>小江的博客。。。也没什么要介绍的好像。。。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-155064561-1');
+</script>
+
+
+  </body>
+
+</html>

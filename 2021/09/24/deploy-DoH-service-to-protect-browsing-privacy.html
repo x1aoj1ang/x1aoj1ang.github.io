@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer" />
+
+  <title>是时候部署DoH服务保护浏览隐私了</title>
+  <meta name="description"
+    content="为什么DoH可以保护你的浏览隐私">
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  
+  <link rel="canonical" href="https://x1aoj1ang.github.io/2021/09/24/deploy-DoH-service-to-protect-browsing-privacy.html">
+  <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">xiaojiang_blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/404.html">Page not found</a>
+          
+        
+          
+          <a class="page-link" href="/about/">about</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">是时候部署DoH服务保护浏览隐私了</h1>
+    <p class="post-meta"><time datetime="2021-09-24T16:15:50+08:00" itemprop="datePublished">Sep 24, 2021</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h2 id="为什么doh可以保护你的浏览隐私">为什么DoH可以保护你的浏览隐私</h2>
+
+<p>DNS的查询是明文的,你所使用网络的提供者或者网络的中经过的任何一个环节的机器,都可以根据DNS查询信息得到你想访问的域名.</p>
+
+<p>而DoH将DNS包在HTTPS请求中,网络提供者无法从传输的流量包中查看HTTPS内的DNS请求.当然了HTTPS安全的前提是在客户端的的证书信任设置无问题无法进行中间人攻击.</p>
+
+<p>所以使用DoH后,无法从DoH请求中得到所浏览网站域名.</p>
+
+<h2 id="为什么是现在">为什么是现在</h2>
+
+<h3 id="浏览器的支持">浏览器的支持</h3>
+
+<p>最早是firefox在2018,到edge/chrome从2020年开始也都支持了DoH了,几大浏览器均已支持.<a href="https://en.wikipedia.org/wiki/DNS_over_HTTPS#Web_browsers">https://en.wikipedia.org/wiki/DNS_over_HTTPS#Web_browsers</a></p>
+
+<h3 id="今年2021年以来的封锁">今年(2021年)以来的封锁</h3>
+
+<p>firefox一开始推出时候,可以直接使用,但现在在几个浏览器中内置的各大DoH服务商的选项均已不可用.</p>
+
+<h2 id="搭建过程">搭建过程</h2>
+
+<p>搭建自己的DoH服务,低调仅自己用,本质上也只是一个普通的HTTPS网站,不会被封.</p>
+
+<h3 id="选择">选择</h3>
+
+<p>需求:</p>
+
+<ul>
+  <li>提供DoH</li>
+  <li>用加密方式,最好是也是DoH,再向其它大的DNS服务请求</li>
+  <li>支持docker部署,能简单配置就上线</li>
+  <li>用的人多</li>
+</ul>
+
+<p>最后选择coreDNS,查了文档向后请求不支持DoH,但支持DoT同样能达到效果.</p>
+
+<h3 id="其它依赖">其它依赖</h3>
+
+<p>域名,拿域名服务商提供的API token给<code class="language-plaintext highlighter-rouge">certbot</code>使用,用<code class="language-plaintext highlighter-rouge">certbot</code>申请<code class="language-plaintext highlighter-rouge">letsencrypt</code>证书,在服务机器上装好<code class="language-plaintext highlighter-rouge">docker</code>和<code class="language-plaintext highlighter-rouge">docker-compose</code></p>
+
+<h3 id="配置">配置</h3>
+
+<p>摘取ansible中的其中两个关键文件:</p>
+
+<p><code class="language-plaintext highlighter-rouge">ansible/roles/coredns/templates/docker-compose.yml.j2</code></p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2.2'</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">coredns</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s1">'</span><span class="s">coredns/coredns:1.8.4'</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">always</span>
+    <span class="na">hostname</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{SERVICE_FQDN}}'</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">0.0.0.0:80:80'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">0.0.0.0:443:443'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">0.0.0.0:53:53'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">0.0.0.0:53:53/udp'</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">{{COREDNS_HOME}}/Corefile:/Corefile'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">/etc/letsencrypt/live/{{SERVICE_FQDN}}/fullchain.pem:/etc/coredns/ssl/{{SERVICE_FQDN}}.crt'</span>
+      <span class="pi">-</span> <span class="s1">'</span><span class="s">/etc/letsencrypt/live/{{SERVICE_FQDN}}/privkey.pem:/etc/coredns/ssl/{{SERVICE_FQDN}}.key'</span>
+
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">ansible/roles/coredns/templates/Corefile.j2</code></p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">.:53 {</span>
+    <span class="s">forward . 8.8.8.8:53</span>
+    <span class="s">log</span>
+<span class="err">}</span>
+
+<span class="s">https://.:443 {</span>
+    <span class="s">forward . 127.0.0.1:5301 127.0.0.1:5302</span>
+    <span class="s">log</span>
+    <span class="s">tls /etc/coredns/ssl/{{SERVICE_FQDN}}.crt /etc/coredns/ssl/{{SERVICE_FQDN}}.key</span>
+<span class="err">}</span>
+
+<span class="s">.:5301 {</span>
+    <span class="s">forward . 8.8.8.8 8.8.4.4 {</span>
+        <span class="s">tls_servername dns.google</span>
+    <span class="s">}</span>
+<span class="err">}</span>
+
+<span class="s">.:5302 {</span>
+    <span class="s">forward . 1.1.1.1 1.0.0.1 {</span>
+        <span class="s">tls_servername cloudflare-dns.com</span>
+    <span class="s">}</span>
+<span class="err">}</span>
+</code></pre></div></div>
+
+<p>成功运行后,服务运行在https://{{SERVICE_FQDN}},在浏览器中填写的是https://{{SERVICE_FQDN}}/dns-query</p>
+
+<p>注意本文中的双大括号是j2模板文件中的,都需要替换为具体变量.</p>
+
+<p>重点是DoH服务,53端口不用的话,测试成功运行后不需要暴露.</p>
+
+<h3 id="测试">测试</h3>
+
+<p>DoH请求需要经过base64后再拼接,可直接参考使用:<a href="https://help.aliyun.com/document_detail/171664.html">https://help.aliyun.com/document_detail/171664.html</a>中的python脚本测试DoH服务.</p>
+
+<p>把下面的dns.alidns.com改成服务域名SERVICE_FQDN,即可测试.</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">dns.message</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">doh_url</span> <span class="o">=</span> <span class="s">"https://dns.alidns.com/dns-query"</span>
+<span class="n">domain</span> <span class="o">=</span> <span class="s">"alibaba.com"</span>
+<span class="n">rr</span> <span class="o">=</span> <span class="s">"A"</span>
+<span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">message</span> <span class="o">=</span> <span class="n">dns</span><span class="p">.</span><span class="n">message</span><span class="p">.</span><span class="n">make_query</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">rr</span><span class="p">)</span>
+<span class="n">dns_req</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="n">to_wire</span><span class="p">()).</span><span class="n">decode</span><span class="p">(</span><span class="s">"UTF8"</span><span class="p">).</span><span class="n">rstrip</span><span class="p">(</span><span class="s">"="</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">doh_url</span> <span class="o">+</span> <span class="s">"?dns="</span> <span class="o">+</span> <span class="n">dns_req</span><span class="p">,</span>
+                 <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s">"Content-type"</span><span class="p">:</span> <span class="s">"application/dns-message"</span><span class="p">})</span>
+<span class="k">for</span> <span class="n">answer</span> <span class="ow">in</span> <span class="n">dns</span><span class="p">.</span><span class="n">message</span><span class="p">.</span><span class="n">from_wire</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">content</span><span class="p">).</span><span class="n">answer</span><span class="p">:</span>
+    <span class="n">dns</span> <span class="o">=</span> <span class="n">answer</span><span class="p">.</span><span class="n">to_text</span><span class="p">().</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">"Query"</span><span class="p">:</span> <span class="n">dns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">"TTL"</span><span class="p">:</span> <span class="n">dns</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">"RR"</span><span class="p">:</span> <span class="n">dns</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="s">"Answer"</span><span class="p">:</span> <span class="n">dns</span><span class="p">[</span><span class="mi">4</span><span class="p">]})</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h3 id="几个坑">几个坑</h3>
+
+<h4 id="corefile中的https服务定义">Corefile中的HTTPS服务定义</h4>
+
+<p>一定<strong>不要</strong>加上域名.写成</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">https://{{SERVICE_FQDN}}:443 {</span>
+    <span class="s">forward . 127.0.0.1:5301 127.0.0.1:5302</span>
+    <span class="s">log</span>
+    <span class="s">tls /etc/coredns/ssl/{{SERVICE_FQDN}}.crt /etc/coredns/ssl/{{SERVICE_FQDN}}.key</span>
+<span class="err">}</span>
+</code></pre></div></div>
+
+<p>这样的话,服务是起来后运行不正常.要把域名换成一个点.</p>
+
+<h4 id="dns的服务">DNS的服务</h4>
+
+<p>如果测试时候要测试DNS的53端口,UDP53端口要一起暴露出来,否则DNS的53服务不正常.</p>
+
+<p>不过不用DNS 53的服务的话,这个也不用管,只是试着运行时候被这个坑到了,以为转发有问题.</p>
+
+<h2 id="藏好了吗">藏好了吗?</h2>
+
+<p>不是,如果你是访问的http的网站, 或者是混合内容的网站,也会暴露浏览的域名.</p>
+
+<p>就算你访问的是纯HTTPS的网站,建立HTTPS的过程中的SNI,也明文暴露了浏览域名.</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQNMbjy9S9mIibONPqehxnrC1uzQoUrIW2yWOdOvz8gMOmDRBcWkKIp4FpMn7QqOUydC2nCLr04nwlA/0?wx_fmt=png" alt="SNI_leak_domain" referrerpolicy="no-referrer" /></p>
+
+<p>因此还需要使用ss,换成在ss服务端暴露这些信息.如果ss服务端的网络提供者不想得到你的浏览信息,你就相对安全了.</p>
+
+<p>或者用洋葱头.</p>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://coredns.io/manual/configuration/">https://coredns.io/manual/configuration/</a></p>
+
+<p><a href="https://github.com/coredns/coredns/issues/3507#issuecomment-622247383">https://github.com/coredns/coredns/issues/3507#issuecomment-622247383</a></p>
+
+<p><a href="https://help.aliyun.com/document_detail/171664.html">https://help.aliyun.com/document_detail/171664.html</a></p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">xiaojiang_blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>xiaojiang_blog</li>
+          <li><a href="mailto:wsxjump@gmail.com">wsxjump@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/x1aoj1ang"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">x1aoj1ang</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>小江的博客。。。也没什么要介绍的好像。。。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-155064561-1');
+</script>
+
+
+  </body>
+
+</html>

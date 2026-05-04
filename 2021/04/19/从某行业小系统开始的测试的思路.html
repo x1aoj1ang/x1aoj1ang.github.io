@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer" />
+
+  <title>从某行业小系统开始的测试的思路</title>
+  <meta name="description"
+    content="之前一直想着通过上报漏洞形式给信息化考核加点分数，这周末从厂商例子想到了一个渗透的途径，并且在某个必须对外开放业务中寻找到一个脆弱的厂商进行测试，有意外收获。">
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  
+  <link rel="canonical" href="https://x1aoj1ang.github.io/2021/04/19/%E4%BB%8E%E6%9F%90%E8%A1%8C%E4%B8%9A%E5%B0%8F%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%A7%8B%E7%9A%84%E6%B5%8B%E8%AF%95%E7%9A%84%E6%80%9D%E8%B7%AF.html">
+  <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">xiaojiang_blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/404.html">Page not found</a>
+          
+        
+          
+          <a class="page-link" href="/about/">about</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">从某行业小系统开始的测试的思路</h1>
+    <p class="post-meta"><time datetime="2021-04-19T00:01:50+08:00" itemprop="datePublished">Apr 19, 2021</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>之前一直想着通过上报漏洞形式给信息化考核加点分数，这周末从厂商例子想到了一个渗透的途径，并且在某个必须对外开放业务中寻找到一个脆弱的厂商进行测试，有意外收获。</p>
+
+<h2 id="两个厂商例子">两个厂商例子</h2>
+
+<p>1.jz，做的是教育行业的：认证，教务，数据相关的
+在这次周末前发现督促整改的一个厂商系统将接口暴露在外网，并且这个端口还是供内部进行Api调用，并且可能接触到敏感信息，由于反代配置失误都暴露在公网。
+在发现这个事情之后，领导说，有可能其他学校也是这种情况，因为这家厂商统一的部署都是这样子，查看了我们同一个城市的其他学校的类似系统确实也是如此：在某个目录暴露了这个接口。
+在厂商以往更新日志中，还看到这接口的swagger和druid暴露……结合暴露在公网的错误配置，也许已经发生了很严重的事情只是我们不知道。
+最后当然是限制在内网了……如果没发现可能就一直在公网了……</p>
+
+<p>2.pd厂商：做的是仪器管理
+泄露了所有客户的用于运维的远程连接，并且系统有上传文件漏洞……
+领导吐槽说这厂商在修复过程中的表现较不专业……</p>
+
+<h2 id="某些厂商容易出问题的原因">某些厂商容易出问题的原因</h2>
+
+<p>太菜</p>
+
+<p>像jz其实规模较大，本身又是主要做身份认证的，倒是愿意相信代码安全上没严重问题，但负责地区部署运维人员和他们总部开发人员水平肯定有差异，而配置也是重要的。</p>
+
+<p>pd就是某个特定行业的公司，面向的是非IT专业人员的，所以他们的甲方（非计算机类的其它理工科专业人员）信息安全意识较差，对乙方安全性上的提出的要求肯定不高。因此，出这样的非常严重事情也很正常。</p>
+
+<h2 id="如何利用">如何利用</h2>
+
+<p>听说上报漏洞可以给单位信息化考核加点小分数，所以周末一直琢磨着怎么利用这种事件或者说这种现象，两个特点：1.厂商部署方式和代码相同，漏洞也都会一样；2.非IT专业采购的系统安全性堪忧。</p>
+
+<p>一开始找了很多方向，发现大多都需要各单位的统一账号才能进入，或者都在内网里面，要求有VPN之类的。</p>
+
+<p>突然想到了一个肯定需要<strong>外部人员也能访问的业务系统</strong>（具体是啥系统得上报了这些漏洞再详细说明。。。）。</p>
+
+<p>以此系统名称为关键字搜索找到了一些厂商，找到了几家，1.第一家官网上还写着提供IT培训，果断不测，因为目标是菜的厂商，能做IT培训的可能不会太菜。2.JZ也有做这个方向，也放弃了测试，大公司虽然产品难用但我这水平想要测出问题可能不容易。 3.K公司一看很丑，打开一个用户案例网站注册连身份证号码都没校验，手机号码也没校验，虽然很专注于此方向，但它看起来就是最菜的，就决定是这家K公司的产品。</p>
+
+<p>然后根据K公司官网的用户案例列表，搜索外人也能注册进入的该业务系统名字进行测试。</p>
+
+<p>用了隔壁的隔壁省的某家省属单位进行了测试。。。</p>
+
+<h2 id="测试结果">测试结果</h2>
+
+<p>注入和上传之类的，似乎有被WAF挡住，也可能是我太菜没能测出来，但是发现了逻辑越权漏洞，由于K公司这套系统的数据查询方式较为灵活，所以很严重，能得到很多个人详细信息，如果能利用好的话，可能都能以此作为社工资料或者有VPN默认密码（例如有些系统喜欢用身份证后六位作为默认密码，而此处越权包括身份证一并泄露）的话，作为下一步攻击的跳板 了。</p>
+
+<h2 id="后续">后续</h2>
+
+<p>接下来会把所有用到此系统的单位尽量测一遍，并上报给上级部门，看能不能给考核加分哈哈。</p>
+
+<p>待厂商修复完成后，再写一篇文章详细说下咋测试的。。。不过其实没啥技术含量，也就逻辑越权，更多的耗费的是人工而没法自动，但正好也发挥了自己能做到的，毕竟如果漏洞能被自动检测到，那也轮不到我们来发现了，大概安全厂商或者恶意人员这些更专业的早就发现或者利用起来了。</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">xiaojiang_blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>xiaojiang_blog</li>
+          <li><a href="mailto:wsxjump@gmail.com">wsxjump@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/x1aoj1ang"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">x1aoj1ang</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>小江的博客。。。也没什么要介绍的好像。。。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-155064561-1');
+</script>
+
+
+  </body>
+
+</html>

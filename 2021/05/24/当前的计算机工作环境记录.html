@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer" />
+
+  <title>当前的计算机工作环境记录</title>
+  <meta name="description"
+    content="之前用ubuntu作为办公机的体验">
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  
+  <link rel="canonical" href="https://x1aoj1ang.github.io/2021/05/24/%E5%BD%93%E5%89%8D%E7%9A%84%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%B7%A5%E4%BD%9C%E7%8E%AF%E5%A2%83%E8%AE%B0%E5%BD%95.html">
+  <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">xiaojiang_blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/404.html">Page not found</a>
+          
+        
+          
+          <a class="page-link" href="/about/">about</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">当前的计算机工作环境记录</h1>
+    <p class="post-meta"><time datetime="2021-05-24T00:15:50+08:00" itemprop="datePublished">May 24, 2021</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h2 id="之前用ubuntu作为办公机的体验">之前用ubuntu作为办公机的体验</h2>
+
+<p>之前把ubuntu作为办公机的系统使用，使用了大概1年多了。</p>
+
+<h3 id="好处">好处</h3>
+
+<p>最大的便利就在于维护机器非常方便：</p>
+
+<ul>
+  <li>ansible只支持用linux作为主控</li>
+  <li>对git的原生支持（win的git其实是mingw环境下的）</li>
+  <li>直接使用ssh连接机器，无需第三方软件</li>
+  <li>对docker的支持</li>
+  <li>在家能直接ssh过来，在外网速不好的时候，比RDP方便，并且也能forward跳转登录其它机器</li>
+  <li>使用bash或python处理一些事情时候，比win方便。。。（不是所有的python包都支持win…但基本都会支持linux）</li>
+  <li>防火墙设置的逻辑比win简单易懂，命令行设置或者编辑配置文件设置也方便多了</li>
+  <li>…</li>
+</ul>
+
+<p>在这个环境下，日常编辑代码用跨平台的VSCode，密码都存在keepass中。</p>
+
+<p>程序员用的软件基本都在linux下面工作的很好。</p>
+
+<h3 id="workaround">workaround</h3>
+
+<p>而不便的地方也很多：最大的不便在于各种只有win版的程序无法使用，比如qq\微信\钉钉以及网银，因此还需要搭配一台虚拟机(建议用数据中心的虚拟机)，再使用ubuntu自带的remmina远程RDP使用虚拟机。</p>
+
+<p>把那些办公软件扔进数据中心的虚拟机里面，还有些额外的好处：</p>
+
+<ul>
+  <li>不受断电影响，获得数据中心级别的物理安全</li>
+  <li>让作为开发机和控制机使用的本机不受流氓软件（QQ等各种非要弹UAC的普通办公软件）影响，就算我的办公虚拟机被控制也无法进一步连到平时从本机控制那群机器，部分隔离了办公环境和生产开发环境</li>
+</ul>
+
+<h3 id="本机系统换成win10的原因">本机系统换成win10的原因</h3>
+
+<p>之前在ubuntu中的remmina有个bug难以忍受，每次在远程桌面里面复制什么内容，就算是纯文本，都要卡一阵子才能出来，而在和其它工友沟通或者有什么事情要处理时候又要从虚拟机拷贝到本机，所以这非常影响工作效率。</p>
+
+<h4 id="win10作为本机系统的优点">win10作为本机系统的优点</h4>
+
+<p>主要是wsl中使用ubuntu，让命令行、git、docker、ssh之类的使用更为原生和方便，因此上述所说的ubuntu作为本机系统的优点，在wsl里面也存在着。包括ansible虽然不能用win10做主控，但是却能使用win10下面的wsl里面的ubuntu做主控。</p>
+
+<p>比如之前使用ubuntu时有时会用ncdu命令来查看文件夹占用空间的情况，而win10虽然没这命令，但是在wsl的ubuntu中，<code class="language-plaintext highlighter-rouge">sudo apt install ncdu</code>后，直接就可以使用ncdu来看磁盘的占用情况了，非常方便，比去折腾GUI下那些杂七杂八的软件舒服多了，并且更安全。</p>
+
+<p>此外，win10 也原生支持了ssh。</p>
+
+<p>并且win10 自带的RDP比remmina体验更好，而之前那套工作环境，安全性主要是日常软件用机和开发部署用户相分离产生的，因此就算换成win10，只要不在本机安装额外软件，还是可以保障安全性。</p>
+
+<p>对了，还有个优点，就算是集成显卡在某些应用上的性能要win10才能发挥。。。虚拟机打开某些应用太卡了<del>，等我有钱自建私有云，一定要试试虚拟机的直通显卡。。。</del>。</p>
+
+<h2 id="当前win10的环境">当前win10的环境</h2>
+
+<p>基于上述原因，在几个月前的长假中换成了win10，在考虑本机应用的时候也考虑了跨平台，将来想要的话也容易再迁到ubuntu或者mac之类的。目前使用了好几个月了，情况稳定。</p>
+
+<h3 id="使用的自带服务和软件">使用的自带服务和软件</h3>
+
+<ul>
+  <li>openssh，建议安装github上更新的版本<a href="https://github.com/PowerShell/openssh-portable">https://github.com/PowerShell/openssh-portable</a>，看issue说是下个大版本才会进win10</li>
+  <li>ssh-agent（OpenSSH Authentication Agent）</li>
+  <li>wsl</li>
+  <li>keychain（wsl中的ubuntu使用）</li>
+  <li>ubuntu20.04</li>
+  <li>VSCode</li>
+  <li>keepass(配合自带ssh使用，太方便了)</li>
+</ul>
+
+<h3 id="好用的自带软件">好用的自带软件</h3>
+
+<ul>
+  <li>自带的sandbox，来路不明又想打开的程序，就在sandbox中打开</li>
+  <li>edge，有个应用程序防护窗口，看着比隐身模式还安全，浏览高危网站必备</li>
+</ul>
+
+<h3 id="大概的设置过程">大概的设置过程</h3>
+
+<ul>
+  <li>开启wsl并安装ubuntu，复制旧系统key文件到wsl里的ubuntu</li>
+  <li>复制旧系统key文件到windows用户.ssh目录</li>
+  <li>开启win10自带的ssh-agent，开机启动</li>
+  <li>在cmd中ssh-add，导入key，让win的cmd/powershell也可以免密登录有权限服务器</li>
+  <li>在wsl/ubuntu中，安装keychain，设置到.bashrc.。让wsl可以免密登录有权限服务器</li>
+  <li>在keepass创建之前remmina中用到的所有机器</li>
+  <li>除了keepass中的各个项目外，vscode也是快捷访问各个项目的入口，因此在迁移时候也可以考虑把vscode的设置也一同迁移，毕竟跨平台，只是项目目录变了也不能用</li>
+</ul>
+
+<h2 id="日常使用">日常使用</h2>
+
+<p>经过这些设置后，用到的额外软件很少，基本只有keepass不是自带的或者官方的，并且也能像MobaXterm、xshell之类的一键ssh打开服务器，如果没有linux图形的需要的话，这样就够用了。</p>
+
+<p>单独连接某台服务器就用keepass.</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQP1Riaiaj5s3gF80aC2CZkOyLnZ6M6Yia1aWJUXOD4OnSZXRNwMxpvUoUzAev4XqCEkCIoNcBd2wl92g/0?wx_fmt=png" alt="keepass" referrerpolicy="no-referrer" /></p>
+
+<p>批量管理某机器群就用vscode打开ansible项目。</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQP1Riaiaj5s3gF80aC2CZkOyLlueByiacrWfDMJzPOQxpNYbmRhDzGBibCrYJcUBDBI1cz85H5Az8RQFw/0?wx_fmt=png" alt="vscode" referrerpolicy="no-referrer" /></p>
+
+<h2 id="细节">细节</h2>
+
+<ul>
+  <li>同时设置两处ssh的agent是为了适应所有情况，比如ansible的主控机，不能由win来当</li>
+  <li>可以参考move-wsl<a href="https://github.com/pxlrbt/move-wsl">https://github.com/pxlrbt/move-wsl</a>，移动wsl的系统安装位置，不然c盘会占太大空间</li>
+  <li>keepass拓展功能十分强大，还能识别cmd://来打开命令行，我这边都把<code class="language-plaintext highlighter-rouge">cmd://ssh {USERNAME}@172.xx.xx.XX</code>作为网址，就能在keepass使用打开网页的功能来打开cmd命令行并且ssh连接服务器。</li>
+  <li>主要使用vscode作为开发工具，并且也是使用ansible批量控制时候的终端，在项目中，右键在linux shell打开，然后<code class="language-plaintext highlighter-rouge">code .</code>就可以wsl模式下打开vscode，再使用vscode的terminal功能，就是在ubuntu中，就能使用ansible控制了</li>
+  <li>vscode中使用git也很方便，比如这篇文章，就是在vscode里面写，写完commit然后用vscode里面的git push，都不用敲命令就提交了。。。后面文章就自动CI/CD发布了。。。</li>
+  <li>千万不要因为有免密而不设置密码，要给不同项目不同厂商下的机器设置不同的密码，否则有啥意外从vmware进不去就完蛋了，我的key曾经被厂商误删掉过，幸好有密码保底。。。</li>
+</ul>
+
+<h2 id="居然有在线vscode了希望gitlab也能跟进">居然有在线vscode了，希望gitlab也能跟进。。。。</h2>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://github.com/PowerShell/openssh-portable">https://github.com/PowerShell/openssh-portable</a></p>
+
+<p><a href="https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse">https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse</a></p>
+
+<p><a href="https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement">https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement</a></p>
+
+<p><a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">https://docs.microsoft.com/en-us/windows/wsl/install-win10</a></p>
+
+<p><a href="https://esc.sh/blog/ssh-agent-windows10-wsl2/">https://esc.sh/blog/ssh-agent-windows10-wsl2/</a></p>
+
+<p><a href="https://devblogs.microsoft.com/commandline/sharing-ssh-keys-between-windows-and-wsl-2/">https://devblogs.microsoft.com/commandline/sharing-ssh-keys-between-windows-and-wsl-2/</a></p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">xiaojiang_blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>xiaojiang_blog</li>
+          <li><a href="mailto:wsxjump@gmail.com">wsxjump@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/x1aoj1ang"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">x1aoj1ang</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>小江的博客。。。也没什么要介绍的好像。。。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-155064561-1');
+</script>
+
+
+  </body>
+
+</html>

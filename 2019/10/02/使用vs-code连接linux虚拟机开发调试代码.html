@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer" />
+
+  <title>使用vs_code连接linux虚拟机开发调试代码</title>
+  <meta name="description"
+    content="最近vs code有个比较实用的功能-Remote Development using SSH正式发布了，之前一直在insider中。">
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  
+  <link rel="canonical" href="https://x1aoj1ang.github.io/2019/10/02/%E4%BD%BF%E7%94%A8vs-code%E8%BF%9E%E6%8E%A5linux%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E4%BB%A3%E7%A0%81.html">
+  <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">xiaojiang_blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/404.html">Page not found</a>
+          
+        
+          
+          <a class="page-link" href="/about/">about</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">使用vs_code连接linux虚拟机开发调试代码</h1>
+    <p class="post-meta"><time datetime="2019-10-02T22:21:07+08:00" itemprop="datePublished">Oct 2, 2019</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>最近vs code有个比较实用的功能-<a href="https://code.visualstudio.com/docs/remote/ssh">Remote Development using SSH</a>正式发布了，之前一直在insider中。</p>
+
+<p>## 为啥要远程连接虚拟机开发</p>
+
+<p>组里前辈提倡用这个功能加上vagrant/ansible配置开发环境让开发和运行环境保持一致，同时又能让程序部署的过程脚本化。
+用了一下感觉很棒，同时得到了windows下的vs code编辑界面和linux下的调试和运行环境。</p>
+
+<p>## 配置方法</p>
+
+<p>具体的配置vs code的文档上面链接中写的非常详细，在vo code中安装插件后配置好.ssh/config连接即可。</p>
+
+<p>## 遇到的问题</p>
+
+<p>### vagrant每次摧毁重来后，机器指纹改变连不上得手动删除ssh中的指纹记录</p>
+
+<p>每次用vs code连接远程主机后，会询问是否信任然后加入known_hosts文件中，但是，在使用vagrant虚拟机调试时经常会需要destroy掉再up，这时候机器指纹改变，导致连不上。。。
+解决办法是像以下这样配置：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host your-project-vagrant
+    User vagrant
+    HostName 127.0.0.1
+    Port 8282
+    IdentityFile D:\Users\yourname\workspace\your-project\.vagrant\machines\default\virtualbox\private_key
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+</code></pre></div></div>
+
+<p>重点是其中的UserKnownHostsFile要让它不写入本机的known_hosts文件中。</p>
+
+<p>### 语言和编码问题</p>
+
+<p>在vs code server默认的语言跟本地vs code一样，远程中的集成终端也是，而如果本地是中文的话，远程的LANG=zh_CN.UTF-8会导致有些命令无法执行(如python manage.py无法运行)。</p>
+
+<p>解决办法：</p>
+
+<p>有两处跟集成终端中的远程环境变量有关的配置：<code class="language-plaintext highlighter-rouge">terminal.integrated.setLocaleVariables</code>和<code class="language-plaintext highlighter-rouge">terminal.integrated.env.linux</code>.</p>
+
+<p>经试验，<code class="language-plaintext highlighter-rouge">terminal.integrated.env.linux</code>优先级较低，会被
+<code class="language-plaintext highlighter-rouge">terminal.integrated.setLocaleVariables</code>所对应本地语言变量配置覆盖。
+将
+<code class="language-plaintext highlighter-rouge">terminal.integrated.setLocaleVariables</code>设置为false，如此<code class="language-plaintext highlighter-rouge">terminal.integrated.env.linux</code>中设置lang就可以生效，或者就不用设置了也能正常运行了。</p>
+
+<p>### 虚拟机没反应的问题</p>
+
+<p>以虚拟机作为开发机的情况下，有时会很卡连ssh都断线。经排查是cpu占有率飙高导致无法使用,其中kswapd0占用率接近100%。
+搜索一下得知：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> kswapd0进程的作用：它是虚拟内存管理中，负责换页的，操作系统每过一定时间就会唤醒kswapd ，看看内存是否紧张，如果不紧张，则睡眠，在 kswapd 中，有2 个阀值，pages_hige 和 pages_low，当空闲内存页的数量低于 pages_low 的时候，kswapd进程就会扫描内存并且每次释放出32 个free pages，直到 free page 的数量到达pages_high。通过阻止kswapd0进程过渡活跃地消耗CPU的方法是设置大页内存。
+</code></pre></div></div>
+
+<p>所以其实是内存太小导致的，因为编辑开发和运行都在虚拟机上，包括vs code server/程序的调试运行/数据库，所以得调整下vagrant配置文件中机器的内存配置，如果是在虚拟机中开发的话，机器性能还是要好点才行，ssd/cpu/内存都要跟得上。</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">xiaojiang_blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>xiaojiang_blog</li>
+          <li><a href="mailto:wsxjump@gmail.com">wsxjump@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/x1aoj1ang"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">x1aoj1ang</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>小江的博客。。。也没什么要介绍的好像。。。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-155064561-1');
+</script>
+
+
+  </body>
+
+</html>

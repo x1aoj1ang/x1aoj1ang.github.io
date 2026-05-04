@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer" />
+
+  <title>给孩子报名培训时发现了个网站漏洞...几千个学生信息可被越权得到...然后...</title>
+  <meta name="description"
+    content="业务逻辑有点问题">
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  
+  <link rel="canonical" href="https://x1aoj1ang.github.io/2019/12/24/%E4%B8%BA%E5%95%A5%E6%88%91%E4%B8%8D%E5%96%9C%E6%AC%A2%E5%9C%A8%E5%B0%8F%E7%B3%BB%E7%BB%9F%E4%B8%8A%E5%A1%AB%E4%BF%A1%E6%81%AF.html">
+  <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">xiaojiang_blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/404.html">Page not found</a>
+          
+        
+          
+          <a class="page-link" href="/about/">about</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">给孩子报名培训时发现了个网站漏洞...几千个学生信息可被越权得到...然后...</h1>
+    <p class="post-meta"><time datetime="2019-12-24T12:45:00+08:00" itemprop="datePublished">Dec 24, 2019</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h2 id="业务逻辑有点问题">业务逻辑有点问题</h2>
+
+<p>前几天某个晚上由于小孩的学习需要,在某个公司的小网站上进行了报名.</p>
+
+<p>这次是第二次报名了,算是老生,这里有个业务规则是老生可以优先提前报名…</p>
+
+<p>上次是我老婆注册帐号报名的,但是忘了帐号了,于是我跟老婆说:完了,肯定不算老生了,用我手机号重新注册一个帐号是不是它就算我是新生不能先报名了(如果拿不到身份证号码做判断的话要是我来写肯定这么写…)…</p>
+
+<p>但毕竟还是要试一下的,不然以后的周末就没事干了.结果还真可以,由于在录入信息的时候,孩子信息只输入了姓名和出生日期没输身份证号码…这么一看,是直接拿名字和日期等非独特信息来判断是否同一个人了…也可能根本就没判断…</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9OjajniaZhIDsSx5jXyVqqdicb4e6icY5vuupTkCQWHyRnokKVU2XwxIMibj2Fw/0?wx_fmt=png" alt="跟我老婆说这网站不行" referrerpolicy="no-referrer" /></p>
+
+<p>判断是否老生的逻辑肯定有问题.</p>
+
+<h2 id="url地址以及权限判断">URL地址以及权限判断</h2>
+
+<p>在我查看已填写的个人信息以及查看我的订单信息时,发现id是放在URL中的,也就是说要查看哪个订单以及查看哪个学员信息,是靠URL传递的参数.</p>
+
+<p>忽然想到,如果连业务逻辑都没想清楚,是不是权限判断也有问题,直接就信任了前端传过来的id参数?</p>
+
+<p>改了下后面的数字…….还真是…</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9Ojaj534maxpHkn09b9et8Jl0Uav7dvwqrZsfLnAHoW0wcNBbDl6HB9uZRw/0?wx_fmt=png" alt="id在url中" referrerpolicy="no-referrer" /></p>
+
+<p>第一个学员:</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9OjajMqP0Bqic4ZmkuyhEEzZE0aaSeCBiadePGcRgB80FkZgicibrZOLq9elfibA/0?wx_fmt=png" alt="第一个学员" referrerpolicy="no-referrer" /></p>
+
+<p>最后一个学员:</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9OjajMluf0Ao7c6MDVZNg3YCKvmPsAI37o1gBjNwia9VoicgmVBbGKeg6icsxQ/0?wx_fmt=png" alt="最后一个学员" referrerpolicy="no-referrer" /></p>
+
+<p>而且还能修改…修改完挂我名下了…程序写得好糟糕…</p>
+
+<p>订单也是相同的情况,只需要改id就能看到报名情况以及全部信息…说不定还能操作别的订单退款以此来抢先报名呢…不敢试了省得麻烦…</p>
+
+<p>那天的第一个订单</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9OjajWH1EVjQYFdMLoNia2BYfuTPSiauCkseNicAIP23Pl6NavLZbrm3IyMsuA/0?wx_fmt=png" alt="那天的第一个订单" referrerpolicy="no-referrer" /></p>
+
+<p>那天的最后一个订单</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9Ojaj5lmLnS74ZAGh6icQTycOeN5GevdJTHOkJuMsz3XGILRBj2ZBo4wmAAQ/0?wx_fmt=png" alt="那天的最后一个订单" referrerpolicy="no-referrer" /></p>
+
+<h2 id="生产环境开调试输出给普通用户">生产环境开调试输出给普通用户</h2>
+
+<p>输错参数还直接给我调试信息了…</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9OjajHgxm3YoMwNrv1St7bXH5jaOybYichE1cfibXfFZn9vWFNbiaaa4mg5icibA/0?wx_fmt=png" alt="调试信息" referrerpolicy="no-referrer" /></p>
+
+<h2 id="框架版本没及时更新">框架版本没及时更新</h2>
+
+<p>用的还是测试的版本,THINKPHP 5.0.0 RC4…</p>
+
+<p>网上随便一搜都可以看到有很多漏洞,包括远程执行漏洞…可惜我不专业…折腾了一下没搞懂怎么弄也不想学PHP了…</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9Ojaj3FTAP65UTEHHcH0WaqwSnsnAyHw8nKQQc7Y70nibyusatxmSffia0NZQ/0?wx_fmt=png" alt="版本信息居然不是正式版的..." referrerpolicy="no-referrer" /></p>
+
+<h2 id="处理">处理</h2>
+
+<p>查了下网络安全法,确认了只是获取信息不盈利也是有罪的,当晚忍住了写脚本获取这个网站上所有信息的冲动(虽然隔天还是蠢蠢欲动…调试都能打开…逻辑那么蠢…说不定普通操作的审计日志都没开…)</p>
+
+<p><strong>我的个人信息也在上面,希望能尽快被处理掉</strong>,至少先把网站关停…于是,我报警了…可是迟迟没有响应…其实我在报警邮件中是有提到要转给网络安全支队处理,也可能我对他们的工作内容理解有误…</p>
+
+<p>没办法,搜了下专业的处理方式,就在在<a href="https://www.cnvd.org.cn/">国家信息安全漏洞共享平台</a>报送了</p>
+
+<p>倒是国家信息安全漏洞共享平台处理得挺快了,当天就确认归档并且送给我10积分哈哈哈,再多拿10分就可以兑换成200元京东卡了…</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9OjajC6POSVHf8Oj1NNB1mG90vYIIPznO15icvyq8Avic9UdIPnddicgBibxgwg/0?wx_fmt=png" alt="报送得到确认" referrerpolicy="no-referrer" /></p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/2FribXdgnhQPXzavvz15YmlmaZot9OjajoSltWOwx0W72lF0NQZB1eS8ndJ6TLTcjib3svRkrWCX3Mw3I69VdIFA/0?wx_fmt=png" alt="积分奖励" referrerpolicy="no-referrer" /></p>
+
+<p>恰好隔天单位内部正在应上级要求整改app,某系统管理员(无计算机专业知识的管理员)似乎在电话中跟我们领导说他们app没问题…我们领导说了句很经典的话”<strong>你觉得没有问题就是最大的问题</strong>“…</p>
+
+<h2 id="结论">结论</h2>
+
+<p>对于开发者:</p>
+
+<ol>
+  <li>
+    <p>逻辑漏洞很难防,得靠开发者自己思考清楚,在各个关键操作环境校验逻辑,本文中的漏洞属于越权漏洞,相信了前端已登录用户的输入,看到了无权看到的</p>
+  </li>
+  <li>
+    <p>所依赖的系统和框架要时时更新到最新,像THINKPHP在5.0版本以及5.1版本即爆出很多框架远程执行漏洞,而且在网上有公开的补丁,也就是说对于专业的恶意攻击者来说,攻击方法是已知了,被攻击是肯定的…除非别人不知道你这个站点(这网站端口是非标准的…)…</p>
+  </li>
+  <li>
+    <p>别在生产开调试…,暴露版本信息后,一搜版本的公开漏洞分分钟被黑…</p>
+  </li>
+</ol>
+
+<p>对于网站管理单位:</p>
+
+<ol>
+  <li>
+    <p>预算有限,但是有更好的办法的,比如依托更大的平台做这事,同样是市属单位的其它同类单位,就把报名网站依托在浙江省某较大平台下…相对安全可靠…同理也不要自建WordPress了,直接依托现有的CMS还比较安全…</p>
+  </li>
+  <li>
+    <p>非要自己开发,风险很大,这网站要是给反g黑k知道了,被替换下首页内容…不知道这单位年底各种奖金会不会没掉…</p>
+  </li>
+</ol>
+
+<p>对于普通用户:</p>
+
+<ol>
+  <li>
+    <p>不要在小网站和小应用上暴露太多信息,他们没能力保护你的信息,收到精准广告信息不要太意外(比如我经常收到幼儿培训的电话…),不一定是网站管理人员故意泄露的</p>
+  </li>
+  <li>
+    <p>每次注册使用的密码最好和别的不一致,不然小网站被黑客整个盗取数据库信息后(脱库)(很可能也是明文保存密码),里面所有的用户名和密码数据会拿去在其他系统尝试登录(撞库)…总有一样的被撞到…</p>
+  </li>
+  <li>
+    <p>以后看到URL中带的顺序参数可以自己改下,或许也能赚个100元(好少…)外快并保护自己的个人信息</p>
+  </li>
+</ol>
+
+<h2 id="不用太担心">不用太担心</h2>
+
+<p>但是业务部门有时为了搜集信息方便(如签到/报名)…会用一些第三方的服务…有些看起来还挺危险…第三方网站的辅助信息收集(微信上这种服务很多)…</p>
+
+<p>也没啥办法啊,只能照做…但也不用太担心,现在国家对信息安全的保护力度很大,只拿到你的几个信息其实也做不了什么,如果你关注信息安全,大概也不太可能被骗…</p>
+
+<h2 id="后续">后续</h2>
+
+<p>第三天早上打给该单位的技术部门座机,回复我说已经收到漏洞通知并且正在看了…看来这个漏洞共享中心还是靠谱,里面宣称3个工作日内报送到有关单位还真是不假…但是却还不关停……</p>
+
+<p>第四天早上,发现已解决权限问题,但是调试还是开着并且框架版本还是旧的没变…再次打电话提醒了下说网上有关于此版本框架版本的远程执行漏洞的公开利用信息,可惜我不懂PHP没法试一下…这个就不管了,到此为止,就把此文发出去了.</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">xiaojiang_blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>xiaojiang_blog</li>
+          <li><a href="mailto:wsxjump@gmail.com">wsxjump@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/x1aoj1ang"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">x1aoj1ang</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>小江的博客。。。也没什么要介绍的好像。。。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-155064561-1');
+</script>
+
+
+  </body>
+
+</html>
