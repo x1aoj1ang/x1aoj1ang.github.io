@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer" />
 
-  <title>sles12.2新机器安装必备软件记录</title>
+  <title>shorts</title>
   <meta name="description"
-    content="一台suse12sp2，装必备软件的时候发现之前一些安装过程的问题虽然记得但是因为没有记录又得重新找，所以就写下来防止以后又到处搜解决方法重新爬坑。。。。。。">
+    content="小江的博客。。。也没什么要介绍的好像。。。
+">
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,16 +19,16 @@
   <link rel="stylesheet" href="/css/main.css">
 
   
-  <link rel="canonical" href="https://x1aoj1ang.github.io/2018/02/12/sles12%E6%96%B0%E6%9C%BA%E5%99%A8%E5%AE%89%E8%A3%85%E5%BF%85%E5%A4%87%E8%BD%AF%E4%BB%B6%E8%AE%B0%E5%BD%95.html">
+  <link rel="canonical" href="https://x1aoj1ang.github.io/shorts/">
   <link rel="alternate" type="application/rss+xml" title="xiaojiang_blog" href="https://x1aoj1ang.github.io/feed.xml">
 </head>
 
 
   <body
-    data-route="articles"
-    data-view="post"
-    data-page-path="/2018/02/12/sles12%E6%96%B0%E6%9C%BA%E5%99%A8%E5%AE%89%E8%A3%85%E5%BF%85%E5%A4%87%E8%BD%AF%E4%BB%B6%E8%AE%B0%E5%BD%95.html"
-    data-page-title="sles12.2新机器安装必备软件记录">
+    data-route="shorts"
+    data-view="route"
+    data-page-path="/shorts/"
+    data-page-title="shorts">
     <div class="shell">
       <aside class="sidebar">
         <div class="sidebar-head">
@@ -163,176 +164,7 @@
         </header>
 
         <div class="main-scroll" id="shell-view">
-          <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-  <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">sles12.2新机器安装必备软件记录</h1>
-    <p class="post-meta"><time datetime="2018-02-12T05:16:39+08:00" itemprop="datePublished">Feb 12, 2018</time></p>
-  </header>
-
-  <div class="post-content" itemprop="articleBody">
-    <p>一台suse12sp2，装必备软件的时候发现之前一些安装过程的问题虽然记得但是因为没有记录又得重新找，所以就写下来防止以后又到处搜解决方法重新爬坑。。。。。。</p>
-
-<h2 id="安装的软件及配置">安装的软件及配置</h2>
-
-<ol>
-  <li>tmux</li>
-  <li>docker</li>
-  <li>set -o vi</li>
-  <li>…</li>
-</ol>
-
-<h2 id="遇到的问题">遇到的问题</h2>
-
-<h3 id="sles怎么安装docker">SLES怎么安装docker</h3>
-
-<p>除了自带的iso光盘的源外，zypper还要添加<a href="https://download.opensuse.org/repositories/Virtualization:/containers/SLE_12_SP2/">suse12.2虚拟化的库</a>，之后就可以安装docker了。</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>zypper <span class="k">in </span>docker  
-zypper <span class="k">in </span>systemd-docker
-systemctl reenable docker.service
-systemctl start docker.service
-</code></pre></div></div>
-<p>另外docker-compose从github的release中下载改名加权限即可。</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-L</span> https://github.com/docker/compose/releases/download/1.19.0/docker-compose-<span class="sb">`</span><span class="nb">uname</span> <span class="nt">-s</span><span class="sb">`</span>-<span class="sb">`</span><span class="nb">uname</span> <span class="nt">-m</span><span class="sb">`</span> <span class="nt">-o</span> /usr/local/bin/docker-compose
-<span class="nb">chmod</span> +x /usr/local/bin/docker-compose
-</code></pre></div></div>
-<p>但是此时运行docker info会发现末尾:</p>
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>WARNING: No swap limit support
-WARNING: No kernel memory limit support
-</code></pre></div></div>
-<p>其中一个（No kernel memory limit support）是由于suse12自带内核版本低于其docker某些特性所需内核版本引起的，可以通过升级内核解决，另外一个问题（No swap limit support）是要修改grub的配置来解决。
-对于No swap limit support：</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">##将GRUB_CMDLINE_LINUX=""修改为：GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1",生效并重启</span>
-vi /etc/default/grub
-grub2-mkconfig  <span class="c">##对于suse用的是这个命令，而不是update-grub（这个好像是ubuntu的），20190403，应该用grub2-mkconfig -o /boot/grub2/grub.cfg</span>
-reboot
-</code></pre></div></div>
-<p>改完之后是这样的：</p>
-<pre><code class="language-txt">GRUB_TIMEOUT=8
-GRUB_CMDLINE_LINUX_DEFAULT="resume=/dev/rootvg/swap splash=silent quiet showopts crashkernel=200M,high crashkernel=72M,low "
-GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
-</code></pre>
-<p>或者在GRUB_CMDLINE_LINUX_DEFAULT里面也可以，把”cgroup_enable=memory swapaccount=1”移动到其后面，改完后这样：</p>
-<pre><code class="language-txt">GRUB_TIMEOUT=8
-GRUB_CMDLINE_LINUX_DEFAULT="resume=/dev/rootvg/swap splash=silent quiet showopts crashkernel=200M,high crashkernel=72M,low cgroup_enable=memory swapaccount=1"
-GRUB_CMDLINE_LINUX=""
-</code></pre>
-
-<p>对于No kernel memory limit support，zypper添加kernel的<a href="https://download.opensuse.org/repositories/Kernel:/stable/standard/">repo</a>,注意，<strong>不要</strong>用<a href="https://download.opensuse.org/repositories/Kernel:/SLE12-SP2/standard/">12sp2链接的kernel_repo</a>，否则版本低不能解决,运行:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>zypper ref
-zypper dup <span class="nt">-r</span> kernel <span class="c">##这边的kernel是repo的名字，视zypper里面kernel源的name而定</span>
-reboot
-</code></pre></div></div>
-<p>然后就没有那两个WARNING了。</p>
-
-<h3 id="杂项小问题">杂项小问题</h3>
-
-<ol>
-  <li>安装tmux前需要先安装libevent和ncurses,在这些之前要先装gcc.</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>zypper <span class="nb">install </span>gcc
-<span class="nb">tar </span>xf libevent-2.1.8-stable.tar.gz
-<span class="nb">cd </span>libevent-2.1.8-stable/
-./configure
-make
-make <span class="nb">install</span>
-..
-..
-<span class="nb">tar </span>xf ncurses-6.1.tar.gz
-<span class="nb">cd </span>ncurses-6.1/
-./configure
-make
-make <span class="nb">install</span>
-..
-..
-<span class="nb">tar </span>xf tmux-2.6.tar.gz
-<span class="nb">cd </span>tmux-2.6/
-./configure <span class="o">&amp;&amp;</span> make
-make <span class="nb">install</span>
-
-</code></pre></div></div>
-
-<ol>
-  <li>但是装完之后（都）安装完这两个依赖后,运行tmux还是提示找不到so文件。此时应该:</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ldconfig <span class="c">##好像是让系统更新动态链接库的索引或者缓存之类的，这样才能找到刚装的so文件</span>
-</code></pre></div></div>
-
-<ol>
-  <li>要在/etc/profile.local改成vi键绑定，不要在/etc/profile。。。，今天突然感觉/etc/profile太长了，在这里放配置好怪，可能换个地方放配置才科学？。。。然后就瞄了下这文件的开头。。。</li>
-</ol>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># /etc/profile for SUSE Linux
-#
-# PLEASE DO NOT CHANGE /etc/profile. There are chances that your changes
-# will be lost during system upgrades. Instead use /etc/profile.local for
-# your local settings, favourite global aliases, VISUAL and EDITOR
-# variables, etc ...
-
-#
-# Check which shell is reading this file
-
-</code></pre></div></div>
-
-<p>所以就：</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> vi /etc/profile.local <span class="c">##刚装的系统没这个文件。在这加一行“set -o vi”</span>
-</code></pre></div></div>
-
-<p>如下图：</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>***-***-**:* # cat /etc/profile.local
-set -o vi
-</code></pre></div></div>
-
-<h2 id="其它">其它</h2>
-
-<p>暂时就先记录这些，有遇到其它问题再补充，防止以后拿到新机器后重新弄这些浪费时间。。。可能写个脚本将这些过程自动化比较合适。。。或者直接虚拟机快照、镜像克隆之类的（可我不是系统管理员不行哈哈）。。。</p>
-
-<h2 id="ps1">ps1</h2>
-
-<p>对于docker-compose的补充，第一次运行docker-compose之后，貌似会创建对应的网卡和路由（172.18.<em>.</em>），而如果如果我们ssh连接的机器，就在这个compose的默认网段内就会发生失去连接的情况（因为172.18.<em>.</em>的路由都到docker的网卡去了。。。这个坑浪费好多时间。。。本来想该compose的默认网口配置来解决，后来别人提供了个思路，用route命令增加对冲突机器的路由）。。。改docker配置就是vi /etc/docker/daemon.json:</p>
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
-  </span><span class="nl">"registry-mirrors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://registry.docker-cn.com"</span><span class="p">],</span><span class="w">
-  </span><span class="nl">"bip"</span><span class="p">:</span><span class="w"> </span><span class="s2">"172.26.0.1/16"</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div></div>
-<p>增加bip这条配置为其它不会冲突的ip段。</p>
-
-<h2 id="ps2suse中的docker配置">ps2：suse中的docker配置</h2>
-
-<p>suse中docker的配置文件的位置和其它系统不同。
-运行时遇到的Temporary failure in name resolution错误。在网上搜到的解决办法是：</p>
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>For Ubuntu
-Edit /etc/default/docker and add your DNS server to the following line:
-Example 
-DOCKER_OPTS="--dns 8.8.8.8 --dns 10.252.252.252"
-</code></pre></div></div>
-<p><strong>但是，在suse中不是！</strong>
-在suse中不存在这个文件，查看<a href="https://www.suse.com/documentation/sles-12/singlehtml/book_sles_docker/book_sles_docker.html">官方文档</a>,可知，在suse中对应的配置文件为：</p>
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/etc/sysconfig/docker
-</code></pre></div></div>
-<p>再比如docker的代理配置也可以在此处配置：</p>
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## Path           : System/Management
-## Description    : Extra cli switches for docker daemon
-## Type           : string
-## Default        : ""
-## ServiceRestart : docker
-#
-DOCKER_OPTS=""
-HTTP_PROXY="http://ip:port"
-HTTPS_PROXY="http://ip:port"
-</code></pre></div></div>
-<p>对suse中的docker而言，此配置文件的配置的环境变量优先级最高，但却又不会出现在systemctl show 展示的环境变量里面。。。。在尝试了/etc/systemd/system/docker.service.d/https-proxy.conf，/etc/docker/daemon.json，~/.docker/config.json，运行systemctl show –property=Environment docker，也不会显示此文件中的环境变量。。。这应该是suse的一个bug吧。</p>
-
-
-  </div>
-
-</article>
-
+          
         </div>
 
         <section class="cmdline-shell">
@@ -400,6 +232,223 @@ HTTPS_PROXY="http://ip:port"
 {"brand":{"site_title":"~/blog — engineer's notebook","hero_kicker":"engineer's notebook · terminal mode","hero_title_line1":"I write down the things","hero_title_line2":"I want to remember","hero_lede":"mostly: infrastructure, security, and operational practices that keep software from breaking when everyone is gone.\n","author":{"name":"redacted","role":"engineer / devops / security","location":"shanghai","timezone":"UTC+8 (Asia/Shanghai)"},"meta":{"tagline":"posts · notes · projects · now","version":"2026-05-07"}},"social":[{"key":"github","label":"github","handle":"x1aoj1ang","url":"https://github.com/x1aoj1ang"},{"key":"rss","label":"rss","handle":"/feed.xml","url":"/feed.xml"},{"key":"email","label":"email","handle":"hello@x1aoj1ang.github.io","url":"mailto:hello@x1aoj1ang.github.io"},{"key":"keybase","label":"keybase","handle":"0xA3F1 0C29 7B2E 4D1B","url":"#"}],"shorts":[{"id":"s14","date":"2026-05-01","text":"today I learned `ssh -J` exists and I have wasted years writing ProxyCommand by hand."},{"id":"s13","date":"2026-04-28","text":"the best production tool is one that fails loudly in staging, not silently in production."},{"id":"s12","date":"2026-04-22","text":"code review is still the only meeting that scales with team size."},{"id":"s11","date":"2026-04-15","text":"if your runbook starts with `ssh`, it is not a runbook."},{"id":"s10","date":"2026-04-09","text":"wrote a 200-line bash script. tomorrow it will be a 40-line python script. next week, gone."}],"projects":[{"id":"p1","name":"kctl","tag":"cli","status":"active","lang":"Go","stars":1242,"blurb":"A friendlier kubectl wrapper with readable context names and safer defaults."},{"id":"p2","name":"honey-trap","tag":"security","status":"active","lang":"Rust","stars":387,"blurb":"A low-interaction SSH honeypot that ships command telemetry to SIEM."},{"id":"p3","name":"dotfiles","tag":"config","status":"active","lang":"Shell","stars":89,"blurb":"Years of tmux, vim, and terminal conventions, mostly comments and habits."},{"id":"p4","name":"tinyca","tag":"infra","status":"maintenance","lang":"Go","stars":511,"blurb":"A compact internal CA for OIDC-issued SSH and TLS certificate rotation."},{"id":"p5","name":"rfc-reader","tag":"tool","status":"archived","lang":"Python","stars":73,"blurb":"A terminal RFC reader with section bookmarks and noise-free output."}],"now":{"city":"shanghai","tz":"Asia/Shanghai","reading":"Designing Data-Intensive Applications — Kleppmann","listening":"Tycho — Awake","building":"an internal cert-rotation service for k8s clusters","thinking":"what platform engineering means after 'infra as code'","updated_at":"2026-05-07T12:00:00+08:00"},"contact":{"pgp_fingerprint":"0xA3F1 0C29 7B2E 4D1B C9A8 01F1 D4F8 8BF0 2EE4 3000","pgp_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\nmQGNBGT8a9YBDADQ+Y3wQ5z9Y5n3W0Vt7uX8K9z1m4N2jH8gF6dC7vR3pL2kO1qZ\nM6yT8N3qP4mX2vL5kO9jH1gF6dC7vR3pL2kO1qZxY5n3W0Vt7uX8K9z1m4N2jH8\nAq2P\n-----END PGP PUBLIC KEY BLOCK-----\n"},"ascii":{"hero":"╭───────────────╮\n│  ∗   ∗   ∗   │\n│   /|\\\\ /|\\\\    │\n│    > • <      │\n│   /|\\\\ /|\\\\    │\n│   /     \\     │\n└───────────────┘\n","about":"╭───────────────╮\n│  @         @  │\n│      |_|      │\n│  /\\\\__╱  ╲__/\\\\  │\n│ /   O  O   \\\\ │\n││     ∩      │\n╰───────────────╯\n"}}
     </script>
     
+    <script type="application/json" id="BLOG_POST_DATA">
+[
+
+  {
+    "title": "注册eu.org免费域名",
+    "slug": "register-eu-org-free-domain-name",
+    "url": "/2022/10/29/register-eu-org-free-domain-name.html",
+    "date": "2022-10-29",
+    "tags": ["free","eu.org","Domain Name","DNS"],
+    "excerpt": "注册eu.org账户",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "升级Windows 11配置使用自建的DoH服务器开启操作系统层面的DoH支持",
+    "slug": "Windows-11-DoH-config",
+    "url": "/2021/10/07/Windows-11-DoH-config.html",
+    "date": "2021-10-07",
+    "tags": ["Windows 11","DoH","DNS","privacy","network security"],
+    "excerpt": "Windows 11的DoH»»HAHAHA",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "是时候部署DoH服务保护浏览隐私了",
+    "slug": "deploy-DoH-service-to-protect-browsing-privacy",
+    "url": "/2021/09/24/deploy-DoH-service-to-protect-browsing-privacy.html",
+    "date": "2021-09-24",
+    "tags": ["coreDNS","DoH","DNS","privacy","network security"],
+    "excerpt": "为什么DoH可以保护你的浏览隐私",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "配置脚本跑actions用referrerpolicy图片属性反防盗链",
+    "slug": "use-github-actions-change-referrerpolicy-for-github-pages-img-link",
+    "url": "/2021/09/22/use-github-actions-change-referrerpolicy-for-github-pages-img-link.html",
+    "date": "2021-09-22",
+    "tags": ["github actions","ci","github pages","jekyll","referrerpolicy"],
+    "excerpt": "需要反防盗链的原因",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "gitlab替换公钥docker部署ee版",
+    "slug": "gitlab替换公钥docker部署ee版",
+    "url": "/2021/09/05/gitlab%E6%9B%BF%E6%8D%A2%E5%85%AC%E9%92%A5docker%E9%83%A8%E7%BD%B2ee%E7%89%88.html",
+    "date": "2021-09-05",
+    "tags": ["gitlab","ee","docker","license"],
+    "excerpt": "为啥使用gitlab ee",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "当前的计算机工作环境记录",
+    "slug": "当前的计算机工作环境记录",
+    "url": "/2021/05/24/%E5%BD%93%E5%89%8D%E7%9A%84%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%B7%A5%E4%BD%9C%E7%8E%AF%E5%A2%83%E8%AE%B0%E5%BD%95.html",
+    "date": "2021-05-24",
+    "tags": ["装机","ssh","wsl","win10"],
+    "excerpt": "之前用ubuntu作为办公机的体验",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "移动端burp抓包",
+    "slug": "移动端的抓包测试",
+    "url": "/2021/05/17/%E7%A7%BB%E5%8A%A8%E7%AB%AF%E7%9A%84%E6%8A%93%E5%8C%85%E6%B5%8B%E8%AF%95.html",
+    "date": "2021-05-17",
+    "tags": ["burpsuite","mitm代理抓包"],
+    "excerpt": "有些app（比如公共服务app）集成了各种业务的服务，而这些服务经常是通过webview的方式呈现，其实就是个浏览器打开的web页面。或者app向后端的请求，一般也是http(s)方式来进行的。想要对其进行测试，就要先抓包，以了解其与后端的交互逻辑。而这里有https的请求，所以要用代理抓包的方式。",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "从某行业小系统开始的测试的思路",
+    "slug": "从某行业小系统开始的测试的思路",
+    "url": "/2021/04/19/%E4%BB%8E%E6%9F%90%E8%A1%8C%E4%B8%9A%E5%B0%8F%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%A7%8B%E7%9A%84%E6%B5%8B%E8%AF%95%E7%9A%84%E6%80%9D%E8%B7%AF.html",
+    "date": "2021-04-19",
+    "tags": ["CTF","信息安全","网络安全","网安","高校","信息化","网络中心","人事信息","招聘","渗透测试","逻辑越权"],
+    "excerpt": "之前一直想着通过上报漏洞形式给信息化考核加点分数，这周末从厂商例子想到了一个渗透的途径，并且在某个必须对外开放业务中寻找到一个脆弱的厂商进行测试，有意外收获。",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "记一次网络中心条线职工团队比赛的经历",
+    "slug": "记一次网络中心条线职工团队比赛的经历",
+    "url": "/2020/09/19/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BD%91%E7%BB%9C%E4%B8%AD%E5%BF%83%E6%9D%A1%E7%BA%BF%E8%81%8C%E5%B7%A5%E5%9B%A2%E9%98%9F%E6%AF%94%E8%B5%9B%E7%9A%84%E7%BB%8F%E5%8E%86.html",
+    "date": "2020-09-19",
+    "tags": ["CTF","CFS","信息安全","网络安全","网安","高校","信息化","网络中心","靶场"],
+    "excerpt": "参加的是“新华三杯” 高校网络安全竞技大赛，面向高校信息中心的网络安全竞赛。由于限定了选手范围，并且要求不能有学生参与，竞争降低了，所以还是可以一试的。",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "研究了下如何退税，从需要补税上千到退税N百。。。总结供参考。。。",
+    "slug": "终于缛了几百元羊毛（退税心得）",
+    "url": "/2020/04/20/%E7%BB%88%E4%BA%8E%E7%BC%9B%E4%BA%86%E5%87%A0%E7%99%BE%E5%85%83%E7%BE%8A%E6%AF%9B-%E9%80%80%E7%A8%8E%E5%BF%83%E5%BE%97.html",
+    "date": "2020-04-20",
+    "tags": ["生活","个人所得税","退税","汇算","补税"],
+    "excerpt": "从需要补税上千到退税好几百的过程",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "给孩子报名培训时发现了个网站漏洞...几千个学生信息可被越权得到...然后...",
+    "slug": "为啥我不喜欢在小系统上填信息",
+    "url": "/2019/12/24/%E4%B8%BA%E5%95%A5%E6%88%91%E4%B8%8D%E5%96%9C%E6%AC%A2%E5%9C%A8%E5%B0%8F%E7%B3%BB%E7%BB%9F%E4%B8%8A%E5%A1%AB%E4%BF%A1%E6%81%AF.html",
+    "date": "2019-12-24",
+    "tags": ["信息安全","信息泄露","漏洞","越权"],
+    "excerpt": "业务逻辑有点问题",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "使用vs_code连接linux虚拟机开发调试代码",
+    "slug": "使用vs-code连接linux虚拟机开发调试代码",
+    "url": "/2019/10/02/%E4%BD%BF%E7%94%A8vs-code%E8%BF%9E%E6%8E%A5linux%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E4%BB%A3%E7%A0%81.html",
+    "date": "2019-10-02",
+    "tags": ["VisualStudioCode","RemoteDevelopment","SSH","vagrant"],
+    "excerpt": "最近vs code有个比较实用的功能-Remote Development using SSH正式发布了，之前一直在insider中。",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "angular的ViewEncapsulation",
+    "slug": "angular的ViewEncapsulation",
+    "url": "/2018/05/30/angular%E7%9A%84ViewEncapsulation.html",
+    "date": "2018-05-30",
+    "tags": ["angular","wechat"],
+    "excerpt": "调样式的过程中发现需要用到ViewEncapsulation…总结下到目前为止的经验…暂时还不太清楚里面的逻辑可能有错误.",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "回来的这一年总结",
+    "slug": "回来的这一年总结",
+    "url": "/2017/sum/2018/04/19/%E5%9B%9E%E6%9D%A5%E7%9A%84%E8%BF%99%E4%B8%80%E5%B9%B4%E6%80%BB%E7%BB%93.html",
+    "date": "2018-04-19",
+    "tags": [],
+    "excerpt": "从17年4月初回福建到现在已经一年了，从做的学的想的几个角度来回忆下这一年都经历了什么。刚好在学校时候也是4月初毕业的，到现在已经毕业4年了。。。时间过得真快。。。",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "docker、jupyter、portus和gitlab的一些使用记录",
+    "slug": "docker、jupyter、portus的一些使用记录",
+    "url": "/2018/03/17/docker-jupyter-portus%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95.html",
+    "date": "2018-03-17",
+    "tags": ["docker","portus","gitlab","jupyter","sybase iq"],
+    "excerpt": "最近太忙事情一多怕忘了赶紧把花时间比较多的坑写下，有点水。。。",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "微信网页开发遇到的问题总结",
+    "slug": "微信网页开发遇到的问题总结",
+    "url": "/2018/03/14/%E5%BE%AE%E4%BF%A1%E7%BD%91%E9%A1%B5%E5%BC%80%E5%8F%91%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93.html",
+    "date": "2018-03-14",
+    "tags": ["微信(wechat)","前端","单页面应用(SPA)"],
+    "excerpt": "…",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "手机上的页面调试方法小结",
+    "slug": "手机上的页面调试方法小结",
+    "url": "/javascript/debug/android/ios/2018/03/12/%E6%89%8B%E6%9C%BA%E4%B8%8A%E7%9A%84%E9%A1%B5%E9%9D%A2%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E5%B0%8F%E7%BB%93.html",
+    "date": "2018-03-12",
+    "tags": [],
+    "excerpt": "最近在开发一个微信上的网站，前期都是用微信开发者工具进行预览，这阶段上真机上看效果发现有电脑上浏览时没有的bug，不管在android还是ios都有bug。。。。而且表现还不一样。。。花了段时间了解如何在手机上调试，在这里总结下。",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "sles12.2新机器安装必备软件记录",
+    "slug": "sles12新机器安装必备软件记录",
+    "url": "/2018/02/12/sles12%E6%96%B0%E6%9C%BA%E5%99%A8%E5%AE%89%E8%A3%85%E5%BF%85%E5%A4%87%E8%BD%AF%E4%BB%B6%E8%AE%B0%E5%BD%95.html",
+    "date": "2018-02-12",
+    "tags": ["suse12.2","install","update kernel","docker"],
+    "excerpt": "一台suse12sp2，装必备软件的时候发现之前一些安装过程的问题虽然记得但是因为没有记录又得重新找，所以就写下来防止以后又到处搜解决方法重新爬坑。。。。。。",
+    "content": "",
+    "read": 1
+  },
+
+  {
+    "title": "Welcome to Jekyll!",
+    "slug": "welcome-to-jekyll",
+    "url": "/jekyll/update/2016/03/25/welcome-to-jekyll.html",
+    "date": "2016-03-25",
+    "tags": [],
+    "excerpt": "You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.",
+    "content": "",
+    "read": 1
+  }
+
+]
+    </script>
+    
+    
+    <script src="/js/blog-shell.js"></script>
     
     <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-155064561-1"></script>
